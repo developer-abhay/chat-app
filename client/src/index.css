@@ -1,0 +1,25 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+  width: 0;
+}
+
+.app {
+  background-color: #121212;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+}
+
+.app-body {
+  height: 90%;
+  width: 90%;
+  margin: auto;
+  border-radius: 5px;
+  box-shadow: -1px 4px 20px -6px #fff;
+  display: flex;
+}
