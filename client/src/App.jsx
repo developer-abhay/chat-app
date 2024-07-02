@@ -1,26 +1,26 @@
-import "./index.css";
-import ChatScreen from "./components/ChatScreen/ChatScreen";
-import SideBar from "./components/Sidebar/Sidebar";
+import { lazy } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Login from "./components/LoginPage/Login";
+import ProtectRoute from "./components/auth/ProtectRoute";
+import "./index.css";
+
+const Login = lazy(() => import("./pages/Login"));
+const Home = lazy(() => import("./pages/Home"));
+const Chat = lazy(() => import("./pages/Chat"));
+const Groups = lazy(() => import("./pages/Groups"));
+
 const App = () => {
+  const user = true;
   return (
-    <div className="app">
-      <Router>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route
-            path="/"
-            element={
-              <div className="app-body">
-                <SideBar />
-                <ChatScreen />
-              </div>
-            }
-          />
-        </Routes>
-      </Router>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route element={<ProtectRoute user={user} />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/chat/:chatId" element={<Chat />} />
+          <Route path="/group" element={<Groups />} />
+        </Route>
+      </Routes>
+    </Router>
   );
 };
 
