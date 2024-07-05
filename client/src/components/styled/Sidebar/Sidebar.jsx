@@ -1,5 +1,5 @@
 import "./Sidebar.css";
-import { Avatar, IconButton } from "@mui/material";
+import { Avatar, Box, Container, IconButton, TextField } from "@mui/material";
 import DonutLargeIcon from "@mui/icons-material/DonutLarge";
 import ChatIcon from "@mui/icons-material/Chat";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -7,37 +7,55 @@ import SearchIcon from "@mui/icons-material/Search";
 import SidebarChat from "./SidebarChat";
 const Sidebar = () => {
   return (
-    <div className="sidebar">
-      <div className="sidebar-header">
-        <Avatar alt="User" src="" />
-        <div className="sidebar-header-right">
-          <IconButton>
-            <DonutLargeIcon />
-          </IconButton>
-          <IconButton>
-            <ChatIcon />
-          </IconButton>
-          <IconButton>
-            <MoreVertIcon />
-          </IconButton>
-        </div>
-      </div>
-
-      <div className="sidebar-search">
-        <div>
+    <Container
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        flex: "0.35",
+        borderRight: "1px solid #fff",
+      }}
+    >
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          height: "39px",
+          padding: "10px",
+          backgroundColor: "#f6f6f6",
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            backgroundColor: "#f6f6f6",
+            width: "100%",
+            height: "35px",
+            borderRadius: "20px",
+          }}
+        >
           <SearchIcon />
-          <input type="text" placeholder="Search or start new chat" />
-        </div>
-      </div>
+          <TextField
+            sx={{
+              background: "transparent",
+              border: "none",
+              outline: "none",
+              width: "100%",
+            }}
+            type="text"
+            placeholder="Search or start new chat"
+          />
+        </Box>
+      </Box>
 
-      <div className="sidebar-chats">
+      <Box className="sidebar-chats">
         <h1>Add a new Chat</h1>
         <SidebarChat />
         <SidebarChat />
         <SidebarChat />
         <SidebarChat />
-      </div>
-    </div>
+      </Box>
+    </Container>
   );
 };
 
