@@ -1,10 +1,15 @@
 import "./Sidebar.css";
-import { Avatar, Box, Container, IconButton, TextField } from "@mui/material";
-import DonutLargeIcon from "@mui/icons-material/DonutLarge";
-import ChatIcon from "@mui/icons-material/Chat";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { Avatar, Box, Container, TextField } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import SidebarChat from "./SidebarChat";
+
+const chatList = [
+  { name: "Abhay", text: "how r u?" },
+  { name: "Chhillar", text: "kal krdunga" },
+  { name: "Sukhu", text: "ek baat bta" },
+  { name: "baby", text: "ok" },
+  { name: "Nice bro", text: "have you completed it?" },
+];
+
 const Sidebar = () => {
   return (
     <Container
@@ -19,41 +24,43 @@ const Sidebar = () => {
         sx={{
           display: "flex",
           alignItems: "center",
-          height: "39px",
-          padding: "10px",
           backgroundColor: "#f6f6f6",
+          width: "100%",
+          height: "35px",
+          borderRadius: "20px",
         }}
       >
-        <Box
+        <SearchIcon />
+        <TextField
           sx={{
-            display: "flex",
-            alignItems: "center",
-            backgroundColor: "#f6f6f6",
+            background: "transparent",
+            border: "none",
+            outline: "none",
             width: "100%",
-            height: "35px",
-            borderRadius: "20px",
           }}
-        >
-          <SearchIcon />
-          <TextField
-            sx={{
-              background: "transparent",
-              border: "none",
-              outline: "none",
-              width: "100%",
-            }}
-            type="text"
-            placeholder="Search or start new chat"
-          />
-        </Box>
+          type="text"
+          placeholder="Search or start new chat"
+        />
       </Box>
 
-      <Box className="sidebar-chats">
-        <h1>Add a new Chat</h1>
-        <SidebarChat />
-        <SidebarChat />
-        <SidebarChat />
-        <SidebarChat />
+      <Box sx={{ flex: "1", backgroundColor: "#fff", overflow: "scroll" }}>
+        {chatList.map(({ name, text }, index) => (
+          <div
+            key={index}
+            style={{
+              display: "flex",
+              padding: "20px",
+              cursor: "pointer",
+              borderBottom: "1px solid #f6f6f6",
+            }}
+          >
+            <Avatar src="" alt="Username" />
+            <div className="sidebar-chat-details">
+              <h2>{name}</h2>
+              <p>{text}</p>
+            </div>
+          </div>
+        ))}
       </Box>
     </Container>
   );

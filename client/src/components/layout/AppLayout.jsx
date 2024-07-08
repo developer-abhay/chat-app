@@ -6,7 +6,7 @@ import { Box, Container, Stack } from "@mui/material";
 
 const AppLayout = () => {
   return (
-    <Stack sx={{ bgcolor: "gray", height: "100vh" }}>
+    <Stack sx={{ height: "100vh" }}>
       <Header />
       <Container
         maxWidth="xl"

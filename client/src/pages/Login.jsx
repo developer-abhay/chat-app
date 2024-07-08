@@ -7,23 +7,98 @@ import {
   TextField,
 } from "@mui/material";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { VisuallyHiddenInput } from "../components/styled/StyledComponents";
 import { bgGradient } from "../constants/colors";
 import { validateFormInput } from "../utils/validators";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { login } from "../redux/UserSlice";
 
-const Login = ({ setUser }) => {
+const Login = ({user}) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
 
   const [isLogin, setIsLogin] = useState(true);
   // User Data states
-  const [photoType, setPhotoType] = useState("");
-  const [photoURL, setPhotoURL] = useState("");
+  const [profilePhoto, setProfilePhoto] = useState({});
   const [name, setName] = useState("");
   const [userName, setUserName] = useState("");
   const [bio, setBio] = useState("");
   const [password, setPassword] = useState("");
+
+  const updateProfilePhoto = (e) => {
+    setProfilePhoto({
+      name: e.target.files[0].name,
+      type: e.target.files[0].type,
+      size: e.target.files[0].size,
+      url: window.URL.createObjectURL(e.target.files[0]),
+    });
+  };
+
+  const loginUser = async (e) => {
+    e.preventDefault();
+
+    const config = {
+      method: "post",
+      withCredentials: true,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: userName,
+        password: password,
+      }),
+    };
+
+    const response = await fetch(
+      "http://localhost:3001/api/v1/user/login",
+      config
+    );
+    if (response.ok) {
+      const data = await response.json();
+      console.log(data.user);
+      dispatch(login(data.user));
+      console.log("User logged In");
+      navigate("/");
+      console.log(user);
+    }
+  };
+
+  const registerUser = async (e) => {
+    e.preventDefault();
+    // setUser(true);
+    // validateFormInput(profilePhoto, name, userName, password);
+
+    const config = {
+      method: "post",
+      // withCredentials: true,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: userName,
+        password,
+        name,
+        bio,
+        avatar: profilePhoto?.url,
+      }),
+    };
+
+    const response = await fetch(
+      "http://localhost:3001/api/v1/user/signup",
+      config
+    );
+    console.log(response.ok);
+
+    console.log("New User Registered");
+    navigate("/");
+  };
+
+  useEffect(() => {
+    // setUser(false);
+  }, []);
 
   return (
     <div
@@ -44,16 +119,17 @@ const Login = ({ setUser }) => {
           elevation={3}
           sx={{
             width: "100%",
+
             padding: 4,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
           }}
         >
           <form
-            onSubmit={
-              isLogin ? (e) => loginUser(e, setUser, navigate) : registerUser
-            }
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+            onSubmit={isLogin ? loginUser : registerUser}
           >
             {isLogin ? (
               <>
@@ -88,7 +164,7 @@ const Login = ({ setUser }) => {
                 <h1>Sign Up</h1>
                 <div style={{ position: "relative" }}>
                   <Avatar
-                    src={photoURL}
+                    src={profilePhoto?.url}
                     style={{
                       width: "100px",
                       height: "100px",
@@ -112,11 +188,7 @@ const Login = ({ setUser }) => {
                     <CameraAltIcon />
                     <VisuallyHiddenInput
                       type="file"
-                      onChange={(e) => {
-                        setPhotoURL(
-                          window.URL.createObjectURL(e.target.files[0])
-                        );
-                      }}
+                      onChange={updateProfilePhoto}
                     />
                   </IconButton>
                 </div>
@@ -167,11 +239,11 @@ const Login = ({ setUser }) => {
               </>
             )}
             <Button
-              type="submit"
               value={isLogin ? "Login" : "Signup"}
-              sx={{ m: 1 }}
+              sx={{ mt: 1, mb: 1 }}
               fullWidth
               variant="contained"
+              type="submit"
             >
               {isLogin ? "Login" : "Signup"}
             </Button>
@@ -180,7 +252,7 @@ const Login = ({ setUser }) => {
               sx={{ textTransform: "Capitalize" }}
               variant="text"
               fullWidth
-              onClick={(e) => setIsLogin((prev) => !prev)}
+              onClick={() => setIsLogin((prev) => !prev)}
             >
               {isLogin
                 ? "Don't have an account? Sign Up"
@@ -194,16 +266,3 @@ const Login = ({ setUser }) => {
 };
 
 export default Login;
-
-const loginUser = (e, setUser, navigate) => {
-  navigate("/");
-  e.preventDefault();
-  setUser(true);
-  console.log("User logged In");
-};
-
-const registerUser = (e) => {
-  e.preventDefault();
-  validateFormInput();
-  console.log("New User Registered");
-};
