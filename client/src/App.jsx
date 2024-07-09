@@ -17,8 +17,15 @@ const App = () => {
     <Router>
       <Suspense fallback={<Loaders />}>
         <Routes>
-          <Route path="/login" element={<Login user={user} />} />
-          <Route element={<ProtectRoute user={user} />}>
+          <Route
+            path="/login"
+            element={
+              <ProtectRoute user={!user} redirect="/">
+                <Login />
+              </ProtectRoute>
+            }
+          />
+          <Route element={<ProtectRoute user={true} />}>
             <Route path="/" element={<Home user={user} />} />
             <Route path="/chat/:chatId" element={<Chat />} />
             <Route path="/group" element={<Groups />} />

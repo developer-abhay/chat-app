@@ -47,8 +47,8 @@ function Header() {
   };
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static" sx={{ bgcolor: orangePrimary }}>
+    <Box sx={{ height: "70px" }}>
+      <AppBar position="static" sx={{ height: "100%", bgcolor: orangePrimary }}>
         <Toolbar>
           <AdbIcon sx={{ mr: 1 }} />
           <Typography

@@ -1,17 +1,30 @@
 import React from "react";
-import Sidebar from "../components/styled/Sidebar/Sidebar";
-import ChatIcon from "@mui/icons-material/Chat";
-import ChatScreen from "../components/styled/ChatScreen/ChatScreen";
-import { Box, Container } from "@mui/material";
+import AdbIcon from "@mui/icons-material/Adb";
+import { Container, Stack, Typography } from "@mui/material";
+import AppLayout from "../components/layout/AppLayout";
 
 const Home = () => {
   return (
-    <div className="app-body">
-      <Sidebar />
-      <Box sx={{ bgcolor: "black", width: "100%" }}>{/* <ChatIcon /> */}</Box>
-      {/* <ChatScreen /> */}
-    </div>
+    <Container
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        textAlign: "center",
+      }}
+    >
+      <AdbIcon sx={{ fontSize: "50px" }} />
+      <Typography variant="h4" mb={2}>
+        Textin for the Web
+      </Typography>
+      <Typography>
+        A web app made using the MERN Stack and socket.io
+        <br />
+        Send and receive messages instantly.
+      </Typography>
+    </Container>
   );
 };
 
-export default Home;
+export default AppLayout()(Home);
