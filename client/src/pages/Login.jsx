@@ -15,10 +15,9 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../redux/UserSlice";
 
-const Login = ({user}) => {
+const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.user);
 
   const [isLogin, setIsLogin] = useState(true);
   // User Data states
@@ -37,9 +36,9 @@ const Login = ({user}) => {
     });
   };
 
+  // Login Function
   const loginUser = async (e) => {
     e.preventDefault();
-
     const config = {
       method: "post",
       withCredentials: true,
@@ -51,29 +50,26 @@ const Login = ({user}) => {
         password: password,
       }),
     };
-
     const response = await fetch(
       "http://localhost:3001/api/v1/user/login",
       config
     );
     if (response.ok) {
       const data = await response.json();
-      console.log(data.user);
       dispatch(login(data.user));
-      console.log("User logged In");
       navigate("/");
-      console.log(user);
+    } else {
+      console.log("There was some error");
     }
   };
 
+  // SignUp Function
   const registerUser = async (e) => {
     e.preventDefault();
-    // setUser(true);
     // validateFormInput(profilePhoto, name, userName, password);
-
     const config = {
       method: "post",
-      // withCredentials: true,
+      withCredentials: true,
       headers: {
         "Content-Type": "application/json",
       },
@@ -85,20 +81,18 @@ const Login = ({user}) => {
         avatar: profilePhoto?.url,
       }),
     };
-
     const response = await fetch(
       "http://localhost:3001/api/v1/user/signup",
       config
     );
-    console.log(response.ok);
-
-    console.log("New User Registered");
-    navigate("/");
+    if (response.ok) {
+      const data = await response.json();
+      dispatch(login(data.user));
+      navigate("/");
+    } else {
+      console.log("There was some error");
+    }
   };
-
-  useEffect(() => {
-    // setUser(false);
-  }, []);
 
   return (
     <div
