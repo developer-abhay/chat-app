@@ -1,13 +1,6 @@
-import {
-  Avatar,
-  Box,
-  Container,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Avatar, Box, Container, Stack, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
-import SearchIcon from "@mui/icons-material/Search";
+import SearchInput from "../shared/SearchInput";
 
 const chatList = [
   { name: "Abhay", text: "how r u?", chatId: "123456" },
@@ -39,30 +32,7 @@ const Sidebar = () => {
         p: 1,
       }}
     >
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          backgroundColor: "#f6f6f6",
-          width: "100%",
-          height: "40px",
-          borderRadius: "20px",
-          mb: 1,
-          p: 2,
-        }}
-      >
-        <SearchIcon />
-        <TextField
-          size="small"
-          sx={{
-            "& fieldset": { border: "none" },
-            background: "transparent",
-            width: "100%",
-          }}
-          type="text"
-          placeholder="Search or start new chat"
-        />
-      </Box>
+      <SearchInput placeholder="Search or start new chat" />
 
       <Stack sx={{ overflow: "scroll" }}>
         {chatList.map(({ name, text, chatId }, index) => (
