@@ -1,14 +1,12 @@
 import { useState } from "react";
 import {
   AppBar,
-  Avatar,
   Box,
   Badge,
   Toolbar,
   IconButton,
   Menu,
   MenuItem,
-  Tooltip,
   Typography,
 } from "@mui/material";
 // Icons
@@ -25,24 +23,106 @@ import {
   CreateGroupDialogBtn,
   NotificationDialogBtn,
 } from "../shared/NavDialog";
+import UserProfile from "../shared/UserProfile";
 
 function Header() {
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [allUsers, setAllUsers] = useState([
+    {
+      avatar: "",
+      username: "hachiko",
+      request: false,
+    },
+    {
+      avatar: "",
+      username: "abhayxy",
+      request: false,
+    },
+    {
+      avatar: "",
+      username: "zixxy",
+      request: false,
+    },
+    {
+      avatar: "",
+      username: "nicehoonmay",
+      request: false,
+    },
+    {
+      avatar: "",
+      username: "samayOp",
+      request: false,
+    },
+    {
+      avatar: "",
+      username: "hachiko1",
+      request: false,
+    },
+    {
+      avatar: "",
+      username: "abhayxy1",
+      request: false,
+    },
+    {
+      avatar: "",
+      username: "zixxy1",
+      request: false,
+    },
+    {
+      avatar: "",
+      username: "nicehoonmay1",
+      request: false,
+    },
+    // {
+    //   avatar: "",
+    //   username: "samayOp1",
+    //   request: false,
+    // },
+    // {
+    //   avatar: "",
+    //   username: "samayOp2",
+    //   request: false,
+    // },
+    // {
+    //   avatar: "",
+    //   username: "hachiko2",
+    //   request: false,
+    // },
+    // {
+    //   avatar: "",
+    //   username: "abhayxy2",
+    //   request: false,
+    // },
+    // {
+    //   avatar: "",
+    //   username: "zixxy2",
+    //   request: false,
+    // },
+    // {
+    //   avatar: "",
+    //   username: "nicehoonmay2",
+    //   request: false,
+    // },
+    // {
+    //   avatar: "",
+    //   username: "samayOp3",
+    //   request: false,
+    // },
+  ]);
+
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
-
-  const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
-  const settings = ["My Account", "Logout"];
-
-  const menuId = "primary-search-account-menu";
   const mobileMenuId = "primary-search-account-menu-mobile";
 
-  const handleProfileMenuOpen = (e) => {
-    setAnchorEl(e.currentTarget);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+
+  const handleMenuOpen = () => {
+    setIsProfileMenuOpen(true);
+    console.log("open");
   };
 
   const handleMenuClose = () => {
-    setAnchorEl(null);
+    setIsProfileMenuOpen(false);
+    console.log("close");
     handleMobileMenuClose();
   };
 
@@ -58,7 +138,7 @@ function Header() {
     {
       title: "My Profile",
       Icon: <AccountCircle fontSize="large" />,
-      onClick: handleProfileMenuOpen,
+      onClick: handleMenuOpen,
     },
     {
       title: "Add Friend",
@@ -93,7 +173,11 @@ function Header() {
       onClose={handleMobileMenuClose}
     >
       {mobileMenuList.map(({ title, Icon, onClick, badge }) => (
-        <MenuItem onClick={onClick} sx={{ px: 3, height: "60px", gap: "15px" }}>
+        <MenuItem
+          key={title}
+          onClick={onClick}
+          sx={{ px: 3, height: "60px", gap: "15px" }}
+        >
           {badge ? (
             <Badge badgeContent={badge.content} color="error">
               {Icon}
@@ -103,30 +187,6 @@ function Header() {
             Icon
           )}
           <p>{title}</p>
-        </MenuItem>
-      ))}
-    </Menu>
-  );
-  // Profile Menu
-  const profileMenu = (
-    <Menu
-      anchorEl={anchorEl}
-      anchorOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-      id={menuId}
-      keepMounted
-      transformOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-      open={isMenuOpen}
-      onClose={handleMenuClose}
-    >
-      {settings.map((setting) => (
-        <MenuItem key={setting} onClick={handleMenuClose}>
-          <Typography textAlign="center">{setting}</Typography>
         </MenuItem>
       ))}
     </Menu>
@@ -155,30 +215,20 @@ function Header() {
           <Box sx={{ flexGrow: 1 }} />
 
           <Box sx={{ display: { xs: "none", md: "flex" } }}>
-            <AddFriendDialogBtn />
-            <CreateGroupDialogBtn />
-            <NotificationDialogBtn />
-
-            <IconButton
-              aria-label="account of current user"
-              aria-controls={menuId}
-              aria-haspopup="true"
-              onClick={handleProfileMenuOpen}
-            >
-              <Tooltip title="Open settings">
-                <Avatar
-                  sx={{
-                    ml: 1,
-                    bgcolor: "white",
-                    color: orangePrimary,
-                    width: "35px",
-                    height: "35px",
-                  }}
-                  alt="Remy Sharp"
-                  src=""
-                />
-              </Tooltip>
-            </IconButton>
+            <AddFriendDialogBtn allUsers={allUsers} setAllUsers={setAllUsers} />
+            <CreateGroupDialogBtn
+              allUsers={allUsers}
+              setAllUsers={setAllUsers}
+            />
+            <NotificationDialogBtn
+              allUsers={allUsers}
+              setAllUsers={setAllUsers}
+            />
+            <UserProfile
+              isMenuOpen={isProfileMenuOpen}
+              handleMenuClose={handleMenuClose}
+              handleMenuOpen={handleMenuOpen}
+            />
           </Box>
           <Box sx={{ display: { xs: "flex", md: "none" } }}>
             <IconButton
@@ -196,8 +246,6 @@ function Header() {
       </AppBar>
       {/* Mobile Menu */}
       {mobileMenu}
-      {/* Profile Menu */}
-      {profileMenu}
     </Box>
   );
 }

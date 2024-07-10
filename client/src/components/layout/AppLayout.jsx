@@ -1,7 +1,6 @@
-import React from "react";
 import Header from "./Header";
 import Sidebar from "../styled/Sidebar";
-import { Box, Container, Grid, Stack } from "@mui/material";
+import { Grid, Stack } from "@mui/material";
 
 const AppLayout = () => (WrappedComponent) => {
   return (props) => {

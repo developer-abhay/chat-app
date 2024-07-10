@@ -1,9 +1,21 @@
-import { Avatar, Box, Container, IconButton, TextField } from "@mui/material";
+import {
+  Avatar,
+  Box,
+  Container,
+  IconButton,
+  Menu,
+  MenuItem,
+  TextField,
+} from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import SearchIcon from "@mui/icons-material/Search";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import SendIcon from "@mui/icons-material/Send";
 import SentimentVerySatisfiedIcon from "@mui/icons-material/SentimentVerySatisfied";
+import ImageIcon from "@mui/icons-material/Image";
+import VideocamIcon from "@mui/icons-material/Videocam";
+import MicIcon from "@mui/icons-material/Mic";
+import DescriptionIcon from "@mui/icons-material/Description";
 
 import AppLayout from "../components/layout/AppLayout";
 import { useEffect, useState } from "react";
@@ -72,6 +84,14 @@ const messages = [
 ];
 
 const Chat = () => {
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
   const userId = "1";
   useEffect(() => {
     const chatBox = document.getElementById("messageBody");
@@ -132,13 +152,57 @@ const Chat = () => {
       </Box>
       {/* Chat Input */}
       <Box sx={{ backgroundColor: "lightgray", display: "flex" }}>
-        <IconButton>
+        <IconButton
+          id="basic-button"
+          aria-controls={open ? "basic-menu" : undefined}
+          aria-haspopup="true"
+          aria-expanded={open ? "true" : undefined}
+          onClick={handleClick}
+        >
           <AttachFileIcon />
         </IconButton>
+
+        <Menu
+          id="basic-menu"
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleClose}
+          MenuListProps={{
+            "aria-labelledby": "basic-button",
+          }}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "left",
+          }}
+          transformOrigin={{
+            vertical: "bottom",
+            horizontal: "left",
+          }}
+        >
+          <MenuItem onClick={handleClose} sx={{ gap: 1 }}>
+            <ImageIcon />
+            Image
+          </MenuItem>
+          <MenuItem onClick={handleClose} sx={{ gap: 1 }}>
+            <VideocamIcon />
+            Video
+          </MenuItem>
+          <MenuItem onClick={handleClose} sx={{ gap: 1 }}>
+            {" "}
+            <MicIcon />
+            Audio
+          </MenuItem>
+          <MenuItem onClick={handleClose} sx={{ gap: 1 }}>
+            {" "}
+            <DescriptionIcon />
+            Docs
+          </MenuItem>
+        </Menu>
         <IconButton>
           <SentimentVerySatisfiedIcon />
         </IconButton>
         <TextField
+          autoComplete="off"
           type="input"
           placeholder="Type a message"
           sx={{

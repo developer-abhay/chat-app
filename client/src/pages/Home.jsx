@@ -1,6 +1,5 @@
-import React from "react";
 import AdbIcon from "@mui/icons-material/Adb";
-import { Container, Stack, Typography } from "@mui/material";
+import { Container, Typography } from "@mui/material";
 import AppLayout from "../components/layout/AppLayout";
 
 const Home = () => {
