@@ -11,9 +11,12 @@ import {
 } from "@mui/material";
 
 import { orangePrimary } from "../../constants/colors";
+import { useDispatch } from "react-redux";
+import { logout } from "../../redux/UserSlice";
 
-const UserProfile = ({ isMenuOpen, handleMenuOpen, handleMenuClose }) => {
+const UserProfile = ({ user, isMenuOpen, handleMenuOpen, handleMenuClose }) => {
   const menuId = "primary-search-account-menu";
+  const dispatch = useDispatch();
 
   return (
     <>
@@ -56,18 +59,34 @@ const UserProfile = ({ isMenuOpen, handleMenuOpen, handleMenuClose }) => {
       >
         <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 2 }}>
           <Stack direction="row" sx={{ gap: 1, alignItems: "center" }}>
-            <Avatar />
-            <Typography>username</Typography>
+            <Avatar src={user.avatar} />
+            <div>
+              <Typography>{user.username}</Typography>
+              <Typography sx={{ fontSize: "12px", color: "#aaa" }}>
+                Joined: {user.joinedAt}
+              </Typography>
+            </div>
           </Stack>
 
-          <TextField value="Abhay" variant="standard" placeholder="Full Name" />
-          <TextField variant="standard" placeholder="Bio" />
+          <TextField
+            autoComplete="off"
+            value={user.name}
+            // onChange={(e)=>}
+            variant="standard"
+            placeholder="Full Name"
+          />
+          <TextField
+            autoComplete="off"
+            value={user.bio}
+            variant="standard"
+            placeholder="Bio"
+          />
           <Button size="small">Save Changes</Button>
           <Button
             sx={{ mt: 5 }}
             variant="outlined"
             color="error"
-            onClick={handleMenuClose}
+            onClick={() => dispatch(logout())}
           >
             Logout
           </Button>

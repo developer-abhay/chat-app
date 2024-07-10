@@ -1,9 +1,11 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ProtectRoute from "./components/auth/ProtectRoute";
 import "./index.css";
 import Loaders from "./components/layout/Loaders";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { login } from "./redux/UserSlice";
+import { Users } from "./constants/sampleData";
 
 const Login = lazy(() => import("./pages/Login"));
 const Home = lazy(() => import("./pages/Home"));
@@ -12,6 +14,13 @@ const Groups = lazy(() => import("./pages/Groups"));
 
 const App = () => {
   const user = useSelector((state) => state.user);
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const user = Users[0];
+    dispatch(login(user));
+  }, []);
 
   return (
     <Router>
@@ -25,7 +34,7 @@ const App = () => {
               </ProtectRoute>
             }
           />
-          <Route element={<ProtectRoute user={true} />}>
+          <Route element={<ProtectRoute user={user} />}>
             <Route path="/" element={<Home user={user} />} />
             <Route path="/chat/:chatId" element={<Chat />} />
             <Route path="/group" element={<Groups />} />

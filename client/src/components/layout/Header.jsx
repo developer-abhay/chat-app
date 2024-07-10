@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSelector } from "react-redux";
 import {
   AppBar,
   Box,
@@ -18,96 +19,11 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import MoreIcon from "@mui/icons-material/MoreVert";
 import { orangePrimary } from "../../constants/colors";
 
-import {
-  AddFriendDialogBtn,
-  CreateGroupDialogBtn,
-  NotificationDialogBtn,
-} from "../shared/NavDialog";
+import NavbarDialogComponent from "../shared/NavDialog";
 import UserProfile from "../shared/UserProfile";
 
 function Header() {
-  const [allUsers, setAllUsers] = useState([
-    {
-      avatar: "",
-      username: "hachiko",
-      request: false,
-    },
-    {
-      avatar: "",
-      username: "abhayxy",
-      request: false,
-    },
-    {
-      avatar: "",
-      username: "zixxy",
-      request: false,
-    },
-    {
-      avatar: "",
-      username: "nicehoonmay",
-      request: false,
-    },
-    {
-      avatar: "",
-      username: "samayOp",
-      request: false,
-    },
-    {
-      avatar: "",
-      username: "hachiko1",
-      request: false,
-    },
-    {
-      avatar: "",
-      username: "abhayxy1",
-      request: false,
-    },
-    {
-      avatar: "",
-      username: "zixxy1",
-      request: false,
-    },
-    {
-      avatar: "",
-      username: "nicehoonmay1",
-      request: false,
-    },
-    // {
-    //   avatar: "",
-    //   username: "samayOp1",
-    //   request: false,
-    // },
-    // {
-    //   avatar: "",
-    //   username: "samayOp2",
-    //   request: false,
-    // },
-    // {
-    //   avatar: "",
-    //   username: "hachiko2",
-    //   request: false,
-    // },
-    // {
-    //   avatar: "",
-    //   username: "abhayxy2",
-    //   request: false,
-    // },
-    // {
-    //   avatar: "",
-    //   username: "zixxy2",
-    //   request: false,
-    // },
-    // {
-    //   avatar: "",
-    //   username: "nicehoonmay2",
-    //   request: false,
-    // },
-    // {
-    //   avatar: "",
-    //   username: "samayOp3",
-    //   request: false,
-    // },
-  ]);
+  const user = useSelector((state) => state.user);
 
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
@@ -215,16 +131,27 @@ function Header() {
           <Box sx={{ flexGrow: 1 }} />
 
           <Box sx={{ display: { xs: "none", md: "flex" } }}>
-            <AddFriendDialogBtn allUsers={allUsers} setAllUsers={setAllUsers} />
-            <CreateGroupDialogBtn
-              allUsers={allUsers}
-              setAllUsers={setAllUsers}
+            <NavbarDialogComponent
+              user={user}
+              text="Add Friends"
+              Icon={<AddIcon />}
             />
-            <NotificationDialogBtn
-              allUsers={allUsers}
-              setAllUsers={setAllUsers}
+            <NavbarDialogComponent
+              user={user}
+              text="Create Group"
+              Icon={<GroupIcon />}
+            />
+            <NavbarDialogComponent
+              user={user}
+              text="Notifications"
+              Icon={
+                <Badge badgeContent="11" color="error">
+                  <NotificationsIcon />
+                </Badge>
+              }
             />
             <UserProfile
+              user={user}
               isMenuOpen={isProfileMenuOpen}
               handleMenuClose={handleMenuClose}
               handleMenuOpen={handleMenuOpen}

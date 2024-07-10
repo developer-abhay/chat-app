@@ -1,7 +1,5 @@
 import * as React from "react";
-import PropTypes from "prop-types";
 import {
-  Badge,
   Box,
   Button,
   IconButton,
@@ -21,27 +19,45 @@ import Dialog from "@mui/material/Dialog";
 import { blue } from "@mui/material/colors";
 import PersonIcon from "@mui/icons-material/Person";
 import AddIcon from "@mui/icons-material/Add";
-import RemoveIcon from "@mui/icons-material/Remove";
-import GroupIcon from "@mui/icons-material/Group";
-import NotificationsIcon from "@mui/icons-material/Notifications";
 import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
 import SearchInput from "./SearchInput";
 
-// Add friend Dialog
-function AddFriendDialog({ onClose, open, allUsers, setAllUsers }) {
-  const handleClose = () => {
-    onClose();
+import { Users } from "../../constants/sampleData";
+
+export default function NavbarDialogComponent({ user, Icon, text }) {
+  const [open, setOpen] = React.useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
   };
-  const handleListItemClick = (username) => {
-    const newUsers = allUsers.map((user) =>
-      user.username !== username ? user : { ...user, request: !user.request }
-    );
-    setAllUsers(newUsers);
+
+  const handleClose = () => {
+    setOpen(false);
   };
 
   return (
-    <Dialog maxWidth="md" onClose={handleClose} open={open}>
+    <>
+      <IconButton size="large" color="inherit" onClick={handleClickOpen}>
+        <Tooltip title={text}>{Icon}</Tooltip>
+      </IconButton>
+      {text == "Add Friends" && (
+        <AddFriendDialog open={open} onClose={handleClose} />
+      )}
+      {text == "Create Group" && (
+        <CreateGroupDialog open={open} onClose={handleClose} />
+      )}
+      {text == "Notifications" && (
+        <NotificationDialog open={open} onClose={handleClose} />
+      )}
+    </>
+  );
+}
+
+// Add friend Dialog
+function AddFriendDialog({ onClose, open }) {
+  return (
+    <Dialog maxWidth="md" onClose={onClose} open={open}>
       <Box sx={{ p: 2 }}>
         <SearchInput placeholder="Search Friends" />
         <List
@@ -50,7 +66,7 @@ function AddFriendDialog({ onClose, open, allUsers, setAllUsers }) {
             maxHeight: "400px",
           }}
         >
-          {allUsers.map(({ avatar, username, request }) => (
+          {Users.map(({ avatar, username }) => (
             <ListItem disableGutters key={username}>
               <ListItemAvatar>
                 <Avatar
@@ -67,9 +83,9 @@ function AddFriendDialog({ onClose, open, allUsers, setAllUsers }) {
                   backgroundColor: "#eee",
                   ":hover": { backgroundColor: "#ddd" },
                 }}
-                onClick={() => handleListItemClick(username)}
               >
-                {request ? <RemoveIcon /> : <AddIcon />}
+                {/* {request ? <RemoveIcon /> : <AddIcon />} */}
+                <AddIcon />
               </IconButton>
             </ListItem>
           ))}
@@ -79,64 +95,10 @@ function AddFriendDialog({ onClose, open, allUsers, setAllUsers }) {
   );
 }
 
-AddFriendDialog.propTypes = {
-  onClose: PropTypes.func.isRequired,
-  open: PropTypes.bool.isRequired,
-  allUsers: PropTypes.array.isRequired,
-  //   selectedValue: PropTypes.string.isRequired,
-};
-
-export function AddFriendDialogBtn({ allUsers, setAllUsers }) {
-  const [open, setOpen] = React.useState(false);
-  // const [selectedValue, setSelectedValue] = useState(emails[1]);
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = (value) => {
-    setOpen(false);
-    // setSelectedValue(value);
-  };
-
-  return (
-    <>
-      <IconButton
-        size="large"
-        aria-label=""
-        color="inherit"
-        onClick={handleClickOpen}
-      >
-        <Tooltip title="Add Friends">
-          <AddIcon />
-        </Tooltip>
-      </IconButton>
-      <AddFriendDialog
-        allUsers={allUsers}
-        setAllUsers={setAllUsers}
-        // selectedValue={selectedValue}
-        open={open}
-        onClose={handleClose}
-      />
-    </>
-  );
-}
-//
-//
 // Create New group Dialog
-function CreateGroupDialog({ onClose, open, allUsers, setAllUsers }) {
-  const handleClose = () => {
-    onClose();
-  };
-  const handleListItemClick = (username) => {
-    const newUsers = allUsers.map((user) =>
-      user.username !== username ? user : { ...user, request: !user.request }
-    );
-    setAllUsers(newUsers);
-  };
-
+function CreateGroupDialog({ onClose, open }) {
   return (
-    <Dialog maxWidth="md" onClose={handleClose} open={open}>
+    <Dialog maxWidth="md" onClose={onClose} open={open}>
       <Box sx={{ p: 2, px: 3 }}>
         <DialogTitle sx={{ textAlign: "center", py: 0 }}>
           Create New Group
@@ -154,7 +116,7 @@ function CreateGroupDialog({ onClose, open, allUsers, setAllUsers }) {
             maxHeight: "280px",
           }}
         >
-          {allUsers.map(({ avatar, username, request }) => (
+          {Users.map(({ avatar, username }) => (
             <ListItem disableGutters key={username}>
               <ListItemAvatar>
                 <Avatar
@@ -171,9 +133,9 @@ function CreateGroupDialog({ onClose, open, allUsers, setAllUsers }) {
                   backgroundColor: "#eee",
                   ":hover": { backgroundColor: "#ddd" },
                 }}
-                onClick={() => handleListItemClick(username)}
               >
-                {request ? <RemoveIcon /> : <AddIcon />}
+                {/* {request ? <RemoveIcon /> : <AddIcon />} */}
+                <AddIcon />
               </IconButton>
             </ListItem>
           ))}
@@ -192,64 +154,10 @@ function CreateGroupDialog({ onClose, open, allUsers, setAllUsers }) {
   );
 }
 
-CreateGroupDialog.propTypes = {
-  onClose: PropTypes.func.isRequired,
-  open: PropTypes.bool.isRequired,
-  allUsers: PropTypes.array.isRequired,
-  //   selectedValue: PropTypes.string.isRequired,
-};
-
-export function CreateGroupDialogBtn({ allUsers, setAllUsers }) {
-  const [open, setOpen] = React.useState(false);
-  //   const [selectedValue, setSelectedValue] = React.useState(emails[1]);
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = (value) => {
-    setOpen(false);
-    setSelectedValue(value);
-  };
-
-  return (
-    <>
-      <IconButton
-        size="large"
-        aria-label=""
-        color="inherit"
-        onClick={handleClickOpen}
-      >
-        <Tooltip title="Create Group">
-          <GroupIcon />
-        </Tooltip>
-      </IconButton>
-      <CreateGroupDialog
-        // selectedValue={selectedValue}
-        allUsers={allUsers}
-        setAllUsers={setAllUsers}
-        open={open}
-        onClose={handleClose}
-      />
-    </>
-  );
-}
-//
-//
 // Notifications Dialogue
-function NotificationDialog({ onClose, open, allUsers, setAllUsers }) {
-  const handleClose = () => {
-    onClose();
-  };
-  const handleListItemClick = (username) => {
-    const newUsers = allUsers.map((user) =>
-      user.username !== username ? user : { ...user, request: !user.request }
-    );
-    setAllUsers(newUsers);
-  };
-
+function NotificationDialog({ onClose, open }) {
   return (
-    <Dialog maxWidth="md" onClose={handleClose} open={open}>
+    <Dialog maxWidth="md" onClose={onClose} open={open}>
       <Box sx={{ p: 3 }}>
         <DialogTitle sx={{ textAlign: "center", py: 0 }}>
           Accept Requests
@@ -260,7 +168,7 @@ function NotificationDialog({ onClose, open, allUsers, setAllUsers }) {
             maxHeight: "280px",
           }}
         >
-          {allUsers.map(({ avatar, username, request }) => (
+          {Users.map(({ avatar, username }) => (
             <ListItem disableGutters key={username}>
               <ListItemAvatar>
                 <Avatar
@@ -277,9 +185,8 @@ function NotificationDialog({ onClose, open, allUsers, setAllUsers }) {
                 sx={{
                   // backgroundColor: "#555",
                   ":hover": { backgroundColor: "#ddd" },
-                  mr: 1,
+                  ml: 2,
                 }}
-                onClick={() => handleListItemClick(username)}
               >
                 <CloseIcon />
               </IconButton>
@@ -289,7 +196,6 @@ function NotificationDialog({ onClose, open, allUsers, setAllUsers }) {
                   // backgroundColor: "#eee",
                   ":hover": { backgroundColor: "#ddd" },
                 }}
-                onClick={() => handleListItemClick(username)}
               >
                 <DoneIcon />
               </IconButton>
@@ -298,50 +204,5 @@ function NotificationDialog({ onClose, open, allUsers, setAllUsers }) {
         </List>
       </Box>
     </Dialog>
-  );
-}
-
-NotificationDialog.propTypes = {
-  onClose: PropTypes.func.isRequired,
-  open: PropTypes.bool.isRequired,
-  allUsers: PropTypes.array.isRequired,
-  //   selectedValue: PropTypes.string.isRequired,
-};
-
-export function NotificationDialogBtn({ allUsers, setAllUsers }) {
-  const [open, setOpen] = React.useState(false);
-  //   const [selectedValue, setSelectedValue] = React.useState(emails[1]);
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = (value) => {
-    setOpen(false);
-    setSelectedValue(value);
-  };
-
-  return (
-    <>
-      <IconButton
-        size="large"
-        aria-label=""
-        color="inherit"
-        onClick={handleClickOpen}
-      >
-        <Tooltip title="Notifications">
-          <Badge badgeContent="11" color="error">
-            <NotificationsIcon />
-          </Badge>
-        </Tooltip>
-      </IconButton>
-      <NotificationDialog
-        // selectedValue={selectedValue}
-        allUsers={allUsers}
-        setAllUsers={setAllUsers}
-        open={open}
-        onClose={handleClose}
-      />
-    </>
   );
 }
