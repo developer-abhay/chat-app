@@ -2,10 +2,16 @@ import { Avatar, Box, Container, Stack, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
 import SearchInput from "../shared/SearchInput";
 import { Chats, Users } from "../../constants/sampleData";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { updateChatId } from "../../redux/UserSlice";
 
 const Sidebar = () => {
   const user = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+
+  const showCurrentChat = (chatId) => {
+    dispatch(updateChatId(chatId));
+  };
   return (
     <Container
       disableGutters
@@ -21,12 +27,12 @@ const Sidebar = () => {
 
       <Stack sx={{ overflow: "scroll" }}>
         {Chats.map(({ lastMessage, _id, members, groupChat }) => {
-          console.log(user._id == members[0]);
           return (
             <Link
               key={_id}
               style={{ textDecoration: "none", color: "inherit" }}
               to={`/chat/${_id}`}
+              onClick={() => showCurrentChat(_id)}
             >
               <Box
                 sx={{
@@ -42,7 +48,13 @@ const Sidebar = () => {
                 }}
               >
                 <Avatar
-                  src=""
+                  src={
+                    groupChat
+                      ? groupChat.avatar
+                      : user._id == members[0]
+                      ? Users.find((user) => user._id == members[1]).avatar
+                      : Users.find((user) => user._id == members[0]).avatar
+                  }
                   alt="Username"
                   sx={{ width: "50px", height: "50px" }}
                 />
@@ -56,16 +68,10 @@ const Sidebar = () => {
                     {groupChat
                       ? groupChat.name
                       : user._id == members[0]
-                      ? Users[members[1]]?.name
-                      : Users[members[0]].name}
+                      ? Users.find((user) => user._id == members[1]).name
+                      : Users.find((user) => user._id == members[0]).name}
                   </h2>
-                  {/* <h2>
-                  {groupChat
-                    ? groupChat.name
-                    : user._id == members["0"]
-                    ? Users[0].name
-                    : "2"}
-                </h2> */}
+
                   <Typography
                     sx={{
                       textWrap: "nowrap",

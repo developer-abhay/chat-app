@@ -4,10 +4,10 @@ require("dotenv").config();
 mongoose.connect(process.env.MONGO_URL);
 
 const UserSchema = new mongoose.Schema({
-  name: String,
+  name: { type: String, required: true },
   username: { type: String, unique: true },
-  password_hash: String,
-  avatar: String,
+  password_hash: { type: String, required: true },
+  // avatar: String,
   bio: String,
   created_at: Date,
 });

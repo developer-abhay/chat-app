@@ -3,9 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ProtectRoute from "./components/auth/ProtectRoute";
 import "./index.css";
 import Loaders from "./components/layout/Loaders";
-import { useDispatch, useSelector } from "react-redux";
-import { login } from "./redux/UserSlice";
-import { Users } from "./constants/sampleData";
+import { useSelector } from "react-redux";
 
 const Login = lazy(() => import("./pages/Login"));
 const Home = lazy(() => import("./pages/Home"));
@@ -14,13 +12,6 @@ const Groups = lazy(() => import("./pages/Groups"));
 
 const App = () => {
   const user = useSelector((state) => state.user);
-
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    const user = Users[0];
-    dispatch(login(user));
-  }, []);
 
   return (
     <Router>

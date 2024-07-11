@@ -41,7 +41,7 @@ const signupMiddleware = async (req, res, next) => {
   const userExist = await User.findOne({ username });
 
   if (userExist) {
-    res.status(404).send({ message: "User already exist" });
+    res.status(400).send({ message: "User already exist" });
   } else {
     bcrypt.genSalt(saltRounds, (err, salt) => {
       if (err) {

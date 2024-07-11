@@ -19,84 +19,36 @@ import DescriptionIcon from "@mui/icons-material/Description";
 
 import AppLayout from "../components/layout/AppLayout";
 import { useEffect, useState } from "react";
-
-const messages = [
-  {
-    text: "Hii buddy ! How are you ?",
-    timeStamp: "Jan 26 2023, 12:02 am GMT",
-    senderId: "2",
-  },
-  {
-    text: "Hii buddy ! How are you ?",
-    timeStamp: "Jan 26 2023, 12:02 am GMT",
-    senderId: "1",
-  },
-  {
-    text: "Hii buddy ! How are you ?",
-    timeStamp: "Jan 26 2023, 12:02 am GMT",
-    senderId: "2",
-  },
-  {
-    text: "Hii buddy ! How are you ?",
-    timeStamp: "Jan 26 2023, 12:02 am GMT",
-    senderId: "1",
-  },
-  {
-    text: "Hii buddy ! How are you ?",
-    timeStamp: "Jan 26 2023, 12:02 am GMT",
-    senderId: "2",
-  },
-  {
-    text: "Hii buddy ! How are you ?",
-    timeStamp: "Jan 26 2023, 12:02 am GMT",
-    senderId: "1",
-  },
-  {
-    text: "Hii buddy ! How are you ?",
-    timeStamp: "Jan 26 2023, 12:02 am GMT",
-    senderId: "1",
-  },
-  {
-    text: "Hii buddy ! How are you ?",
-    timeStamp: "Jan 26 2023, 12:02 am GMT",
-    senderId: "1",
-  },
-  {
-    text: "Hii buddy ! How are you ?",
-    timeStamp: "Jan 26 2023, 12:02 am GMT",
-    senderId: "2",
-  },
-  {
-    text: "Hii buddy ! How are you ?",
-    timeStamp: "Jan 26 2023, 12:02 am GMT",
-    senderId: "1",
-  },
-  {
-    text: "Hii buddy ! How are you ?",
-    timeStamp: "Jan 26 2023, 12:02 am GMT",
-    senderId: "2",
-  },
-  {
-    text: "Hii buddy ! How are you ?",
-    timeStamp: "Jan 26 2023, 12:02 am GMT",
-    senderId: "1",
-  },
-];
+import { useSelector } from "react-redux";
+import { Chats, messages, Users } from "../constants/sampleData";
 
 const Chat = () => {
+  const user = useSelector((state) => state.user);
+  const chatId = useSelector((state) => state.chatId);
+  const [chatSender, setChatSender] = useState(null);
+
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-  const handleClick = (event) => {
+
+  const handleAttachFile = (event) => {
     setAnchorEl(event.currentTarget);
   };
-  const handleClose = () => {
+
+  const handleAttachFileClose = () => {
     setAnchorEl(null);
   };
-  const userId = "1";
+
   useEffect(() => {
     const chatBox = document.getElementById("messageBody");
     chatBox.scrollTop = chatBox.scrollHeight;
-  }, []);
+
+    const isGroup = Chats.find((chat) => chat._id == chatId).groupChat;
+    if (!isGroup) {
+      const members = Chats.find((chat) => chat._id == chatId).members;
+      const chatSenderId = user._id == members[0] ? members[1] : members[0];
+      setChatSender(Users.find((user) => user._id == chatSenderId));
+    }
+  }, [chatId]);
   return (
     <Container
       disableGutters
@@ -115,12 +67,12 @@ const Chat = () => {
         }}
       >
         <Avatar
-          src=""
+          src={chatSender?.avatar}
           alt="User-profile"
           sx={{ width: 52, height: 52, mr: 2 }}
         />
         <div style={{ flex: 1 }}>
-          <h3 style={{ mb: 1, fontWeight: 500 }}>Chhillar</h3>
+          <h3 style={{ mb: 1, fontWeight: 500 }}>{chatSender?.name}</h3>
           <p style={{ color: "gray" }}>
             Last seen Fri,04 Sep 2020 18:00:16 GMT
           </p>
@@ -140,12 +92,12 @@ const Chat = () => {
         }}
         id="messageBody"
       >
-        {messages.map(({ text, timeStamp, senderId }, index) => (
+        {messages.map(({ content, timeStamp, senderId }, index) => (
           <ChatText
             key={index}
-            text={text}
+            text={content}
             timeStamp={timeStamp}
-            userId={userId}
+            userId={user._id}
             senderId={senderId}
           />
         ))}
@@ -157,7 +109,7 @@ const Chat = () => {
           aria-controls={open ? "basic-menu" : undefined}
           aria-haspopup="true"
           aria-expanded={open ? "true" : undefined}
-          onClick={handleClick}
+          onClick={handleAttachFile}
         >
           <AttachFileIcon />
         </IconButton>
@@ -166,7 +118,7 @@ const Chat = () => {
           id="basic-menu"
           anchorEl={anchorEl}
           open={open}
-          onClose={handleClose}
+          onClose={handleAttachFileClose}
           MenuListProps={{
             "aria-labelledby": "basic-button",
           }}
@@ -179,20 +131,20 @@ const Chat = () => {
             horizontal: "left",
           }}
         >
-          <MenuItem onClick={handleClose} sx={{ gap: 1 }}>
+          <MenuItem onClick={handleAttachFileClose} sx={{ gap: 1 }}>
             <ImageIcon />
             Image
           </MenuItem>
-          <MenuItem onClick={handleClose} sx={{ gap: 1 }}>
+          <MenuItem onClick={handleAttachFileClose} sx={{ gap: 1 }}>
             <VideocamIcon />
             Video
           </MenuItem>
-          <MenuItem onClick={handleClose} sx={{ gap: 1 }}>
+          <MenuItem onClick={handleAttachFileClose} sx={{ gap: 1 }}>
             {" "}
             <MicIcon />
             Audio
           </MenuItem>
-          <MenuItem onClick={handleClose} sx={{ gap: 1 }}>
+          <MenuItem onClick={handleAttachFileClose} sx={{ gap: 1 }}>
             {" "}
             <DescriptionIcon />
             Docs

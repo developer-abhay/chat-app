@@ -3,6 +3,8 @@ const { signupMiddleware, loginMiddleware } = require("../middlewares/index");
 const { User } = require("../db");
 const route = Router();
 
+var multer = require("multer");
+
 // Login Route
 route.post("/login", loginMiddleware, (req, res) => {
   const user = req.userObj; //from middleware
@@ -23,16 +25,20 @@ route.post("/signup", signupMiddleware, (req, res) => {
     password_hash,
     bio,
     avatar,
-  }).then((user) => {
-    res.status(200).send({
-      user: {
-        name: user.name,
-        username: user.username,
-        bio: user.bio,
-        avatar: user.avatar,
-      },
+  })
+    .then((user) => {
+      res.status(200).send({
+        user: {
+          name: user.name,
+          username: user.username,
+          bio: user.bio,
+          avatar: user.avatar,
+        },
+      });
+    })
+    .catch((err) => {
+      res.send({ error: err });
     });
-  });
 });
 
 module.exports = { route };

@@ -17,6 +17,7 @@ const SearchInput = ({ placeholder }) => {
     >
       <SearchIcon />
       <TextField
+        autoComplete="off"
         size="small"
         sx={{
           "& fieldset": { border: "none" },

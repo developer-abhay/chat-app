@@ -27,14 +27,15 @@ const Login = () => {
   const [bio, setBio] = useState("");
   const [password, setPassword] = useState("");
 
-  const updateProfilePhoto = (e) => {
-    setProfilePhoto({
-      name: e.target.files[0].name,
-      type: e.target.files[0].type,
-      size: e.target.files[0].size,
-      url: window.URL.createObjectURL(e.target.files[0]),
-    });
-  };
+  // const updateProfilePhoto = (e) => {
+  // setProfilePhoto({
+  //   name: e.target.files[0].name,
+  //   type: e.target.files[0].type,
+  //   size: e.target.files[0].size,
+  //   url: window.URL.createObjectURL(e.target.files[0]),
+  // });
+
+  // };
 
   // Login Function
   const loginUser = async (e) => {
@@ -67,6 +68,7 @@ const Login = () => {
   const registerUser = async (e) => {
     e.preventDefault();
     // validateFormInput(profilePhoto, name, userName, password);
+
     const config = {
       method: "post",
       withCredentials: true,
@@ -78,7 +80,7 @@ const Login = () => {
         password,
         name,
         bio,
-        avatar: profilePhoto?.url,
+        avatar: profilePhoto,
       }),
     };
     const response = await fetch(
@@ -87,10 +89,12 @@ const Login = () => {
     );
     if (response.ok) {
       const data = await response.json();
-      dispatch(login(data.user));
-      navigate("/");
+      // dispatch(login(data.user));
+      console.log(profilePhoto);
+      console.log(data.user);
+      // navigate("/");
     } else {
-      console.log("There was some error");
+      console.log(response);
     }
   };
 
@@ -182,7 +186,7 @@ const Login = () => {
                     <CameraAltIcon />
                     <VisuallyHiddenInput
                       type="file"
-                      onChange={updateProfilePhoto}
+                      onChange={(e) => setProfilePhoto(e.target.files[0])}
                     />
                   </IconButton>
                 </div>
