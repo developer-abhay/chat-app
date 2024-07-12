@@ -2,37 +2,35 @@ const bcrypt = require("bcrypt");
 const { User } = require("../db");
 const multer = require("multer");
 
-const loginMiddleware = (req, res, next) => {
+const loginMiddleware = async (req, res, next) => {
   const username = req.body.username;
   const password = req.body.password;
 
-  User.findOne({ username }).then((data) => {
-    if (!data) {
-      res.status(404).send({ message: "User does not exist" });
-    } else {
-      let storedHashedPassword = data.password_hash;
+  const data = await User.findOne({ username });
 
-      bcrypt.compare(password, storedHashedPassword, (err, result) => {
-        if (err) {
-          res.status(500).send({ message: "Error comparing passwords" });
-        }
-        if (result) {
-          req.userObj = {
-            _id: data._id,
-            name: data.name,
-            username: data.username,
-            bio: data.bio,
-            avatar: data.avatar,
-          };
-
-          next();
-        } else
-          res
-            .status(401)
-            .send("Passwords do not match! Authentication failed.");
-      });
-    }
-  });
+  if (!data) {
+    res.status(404).send({ message: "User does not exist" });
+  } else {
+    let storedHashedPassword = data.password_hash;
+    bcrypt.compare(password, storedHashedPassword, (err, result) => {
+      if (err) {
+        res.status(500).send({ message: "Error comparing passwords" });
+      }
+      if (result) {
+        req.userObj = {
+          _id: data._id,
+          name: data.name,
+          username: data.username,
+          avatar: data.avatar,
+          bio: data.bio,
+          friends: data.friends,
+          created_at: data.created_at,
+        };
+        next();
+      } else
+        res.status(401).send("Passwords do not match! Authentication failed.");
+    });
+  }
 };
 
 const signupMiddleware = async (req, res, next) => {

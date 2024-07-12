@@ -1,4 +1,4 @@
-const { Router } = require("express");
+const { Router, query } = require("express");
 const {
   signupMiddleware,
   loginMiddleware,
@@ -65,6 +65,16 @@ route.post(
   }
 );
 
+// Get all requests
+route.get("/request/:id", async (req, res) => {
+  const { id } = req.params;
+  const allRequests = await Request.find(
+    { senderId: id },
+    { receiverId: true, status: true }
+  );
+  res.status(200).send({ allRequests });
+});
+
 // Send Request
 route.post("/request", async (req, res) => {
   const { senderId, receiverId } = req.body;
@@ -72,7 +82,25 @@ route.post("/request", async (req, res) => {
     senderId,
     receiverId,
   });
-  res.status(200).json({ message: "Request send" });
+  const allRequests = await Request.find(
+    { senderId: senderId },
+    { receiverId: true, status: true }
+  );
+  res.status(200).json({ allRequests });
+});
+
+// Cancel Request
+route.delete("/request", async (req, res) => {
+  const { senderId, receiverId } = req.body;
+  await Request.findOneAndDelete({
+    senderId,
+    receiverId,
+  });
+  const allRequests = await Request.find(
+    { senderId: senderId },
+    { receiverId: true, status: true }
+  );
+  res.status(200).json({ allRequests });
 });
 
 module.exports = { route };
