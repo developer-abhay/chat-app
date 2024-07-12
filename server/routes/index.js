@@ -1,9 +1,23 @@
 const { Router } = require("express");
-const { signupMiddleware, loginMiddleware } = require("../middlewares/index");
-const { User } = require("../db");
+const {
+  signupMiddleware,
+  loginMiddleware,
+  upload,
+} = require("../middlewares/index");
+const path = require("path");
+const { User, Request } = require("../db");
 const route = Router();
+const { uploadToCloudinary } = require("../utils/cloudinary");
+const { resolveSoa } = require("dns");
 
-var multer = require("multer");
+// Get all Users
+route.get("/", async (req, res) => {
+  const allUsers = await User.find(
+    {},
+    { name: true, username: true, avatar: true }
+  );
+  res.status(200).send({ users: allUsers });
+});
 
 // Login Route
 route.post("/login", loginMiddleware, (req, res) => {
@@ -12,21 +26,29 @@ route.post("/login", loginMiddleware, (req, res) => {
 });
 
 // Sign Up Route
-route.post("/signup", signupMiddleware, (req, res) => {
-  const name = req.body.name;
-  const username = req.body.username;
-  const bio = req.body.bio;
-  const avatar = req.body.avatar;
-  const password_hash = req.hashedPassword; //from middleware
+route.post(
+  "/signup",
+  upload.single("avatar"),
+  signupMiddleware,
+  async (req, res) => {
+    const { name, username, bio } = req.body;
+    const password_hash = req.hashedPassword;
+    let avatar;
 
-  User.create({
-    name,
-    username,
-    password_hash,
-    bio,
-    avatar,
-  })
-    .then((user) => {
+    if (req.file) {
+      const avatarPath = path.join(__dirname, "..", req.file.path);
+      avatar = await uploadToCloudinary(avatarPath);
+    }
+
+    try {
+      const user = await User.create({
+        name,
+        username,
+        password_hash,
+        bio,
+        avatar,
+      });
+
       res.status(200).send({
         user: {
           name: user.name,
@@ -35,10 +57,22 @@ route.post("/signup", signupMiddleware, (req, res) => {
           avatar: user.avatar,
         },
       });
-    })
-    .catch((err) => {
-      res.send({ error: err });
-    });
+    } catch (err) {
+      res.status(500).send({
+        error: "An error occurred while creating the user.",
+      });
+    }
+  }
+);
+
+// Send Request
+route.post("/request", async (req, res) => {
+  const { senderId, receiverId } = req.body;
+  await Request.create({
+    senderId,
+    receiverId,
+  });
+  res.status(200).json({ message: "Request send" });
 });
 
 module.exports = { route };

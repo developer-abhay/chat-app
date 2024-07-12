@@ -26,20 +26,17 @@ const Login = () => {
   const [userName, setUserName] = useState("");
   const [bio, setBio] = useState("");
   const [password, setPassword] = useState("");
+  const [tempAvatar, setTempAvatar] = useState("");
 
-  // const updateProfilePhoto = (e) => {
-  // setProfilePhoto({
-  //   name: e.target.files[0].name,
-  //   type: e.target.files[0].type,
-  //   size: e.target.files[0].size,
-  //   url: window.URL.createObjectURL(e.target.files[0]),
-  // });
-
-  // };
+  const updateAvatar = (e) => {
+    setTempAvatar(window.URL.createObjectURL(e.target.files[0]));
+    setProfilePhoto(e.target.files[0]);
+  };
 
   // Login Function
   const loginUser = async (e) => {
     e.preventDefault();
+
     const config = {
       method: "post",
       withCredentials: true,
@@ -52,7 +49,7 @@ const Login = () => {
       }),
     };
     const response = await fetch(
-      "http://localhost:3001/api/v1/user/login",
+      `${import.meta.env.VITE_BACKEND_ORIGIN}/user/login`,
       config
     );
     if (response.ok) {
@@ -69,32 +66,35 @@ const Login = () => {
     e.preventDefault();
     // validateFormInput(profilePhoto, name, userName, password);
 
+    const signupForm = new FormData();
+    signupForm.append("name", name);
+    signupForm.append("username", userName);
+    signupForm.append("password", password);
+    signupForm.append("bio", bio);
+    signupForm.append("avatar", profilePhoto);
+
     const config = {
       method: "post",
       withCredentials: true,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        username: userName,
-        password,
-        name,
-        bio,
-        avatar: profilePhoto,
-      }),
+      body: signupForm,
     };
-    const response = await fetch(
-      "http://localhost:3001/api/v1/user/signup",
-      config
-    );
-    if (response.ok) {
-      const data = await response.json();
-      // dispatch(login(data.user));
-      console.log(profilePhoto);
-      console.log(data.user);
-      // navigate("/");
-    } else {
-      console.log(response);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_ORIGIN}/user/signup`,
+        config
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        console.log(error.message);
+      }
+      if (response.ok) {
+        const data = await response.json();
+        dispatch(login(data.user));
+        navigate("/");
+      }
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -162,7 +162,7 @@ const Login = () => {
                 <h1>Sign Up</h1>
                 <div style={{ position: "relative" }}>
                   <Avatar
-                    src={profilePhoto?.url}
+                    src={tempAvatar}
                     style={{
                       width: "100px",
                       height: "100px",
@@ -186,7 +186,7 @@ const Login = () => {
                     <CameraAltIcon />
                     <VisuallyHiddenInput
                       type="file"
-                      onChange={(e) => setProfilePhoto(e.target.files[0])}
+                      onChange={(e) => updateAvatar(e)}
                     />
                   </IconButton>
                 </div>

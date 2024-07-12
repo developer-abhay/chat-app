@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt");
 const { User } = require("../db");
+const multer = require("multer");
 
 const loginMiddleware = (req, res, next) => {
   const username = req.body.username;
@@ -17,6 +18,7 @@ const loginMiddleware = (req, res, next) => {
         }
         if (result) {
           req.userObj = {
+            _id: data._id,
             name: data.name,
             username: data.username,
             bio: data.bio,
@@ -38,25 +40,41 @@ const signupMiddleware = async (req, res, next) => {
   const password = req.body.password;
   const saltRounds = 10;
 
-  const userExist = await User.findOne({ username });
+  try {
+    const userExist = await User.findOne({ username });
 
-  if (userExist) {
-    res.status(400).send({ message: "User already exist" });
-  } else {
-    bcrypt.genSalt(saltRounds, (err, salt) => {
-      if (err) {
-        res.status(500).send({ message: "Something went wrong" });
-      }
-
-      bcrypt.hash(password, salt, (err, hash) => {
+    if (userExist) {
+      res.status(400).json({ message: "User already exist" });
+    } else {
+      bcrypt.genSalt(saltRounds, (err, salt) => {
         if (err) {
-          res.status(500).send({ message: "Something went wrong" });
+          res.status(500).json({ message: "Something went wrong" });
         }
-        req.hashedPassword = hash;
-        next();
+
+        bcrypt.hash(password, salt, (err, hash) => {
+          if (err) {
+            res.status(500).json({ message: "Something went wrong" });
+          }
+          req.hashedPassword = hash;
+          next();
+        });
       });
-    });
+    }
+  } catch (err) {
+    console.log({ error: "Somewent wrong" });
   }
 };
 
-module.exports = { signupMiddleware, loginMiddleware };
+// Avatar upload middleware
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "./uploads");
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.fieldname + Math.floor(Math.random() * 1000000));
+  },
+});
+
+const upload = multer({ storage: storage });
+
+module.exports = { signupMiddleware, loginMiddleware, upload };
