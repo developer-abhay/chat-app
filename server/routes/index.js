@@ -68,10 +68,9 @@ route.post(
 // Get all requests
 route.get("/request/:id", async (req, res) => {
   const { id } = req.params;
-  const allRequests = await Request.find(
-    { senderId: id },
-    { receiverId: true, status: true }
-  );
+  const allRequests = await Request.find({
+    $or: [{ receiverId: id }, { senderId: id }],
+  });
   res.status(200).send({ allRequests });
 });
 
@@ -82,25 +81,61 @@ route.post("/request", async (req, res) => {
     senderId,
     receiverId,
   });
-  const allRequests = await Request.find(
-    { senderId: senderId },
-    { receiverId: true, status: true }
-  );
+  const allRequests = await Request.find({
+    $or: [{ receiverId }, { senderId }],
+  });
   res.status(200).json({ allRequests });
 });
 
-// Cancel Request
+// Cancel Request and Reject Request
 route.delete("/request", async (req, res) => {
   const { senderId, receiverId } = req.body;
   await Request.findOneAndDelete({
     senderId,
     receiverId,
   });
-  const allRequests = await Request.find(
-    { senderId: senderId },
-    { receiverId: true, status: true }
-  );
+  const allRequests = await Request.find({
+    $or: [{ receiverId }, { senderId }],
+  });
   res.status(200).json({ allRequests });
+});
+
+// accept request
+route.put("/request", async (req, res) => {
+  const { senderId, receiverId } = req.body;
+
+  const receiver = await User.findOne({ _id: receiverId });
+  if (!receiver) {
+    return res.status(404).json({ message: "Receiver not found" });
+  }
+  // Check if the sender is already a friend
+  if (receiver.friends.includes(senderId)) {
+    return res.status(400).json({ message: "User is already a friend" });
+  }
+
+  await User.findOneAndUpdate(
+    { _id: receiverId },
+    { $push: { friends: senderId } }
+  );
+  await User.findOneAndUpdate(
+    { _id: senderId },
+    { $push: { friends: receiverId } }
+  );
+
+  await Request.findOneAndDelete({
+    senderId,
+    receiverId,
+  });
+
+  const updatedUser = await User.findOne({ _id: receiverId });
+  const allRequests = await Request.find({
+    $or: [{ receiverId }, { senderId }],
+  });
+  res.status(200).json({
+    message: "Friend added successfully",
+    user: updatedUser,
+    allRequests,
+  });
 });
 
 module.exports = { route };

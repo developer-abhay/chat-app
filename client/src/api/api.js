@@ -1,4 +1,4 @@
-import { getRequests, getUsers } from "../redux/UserSlice";
+import { getRequests, getUsers, login } from "../redux/UserSlice";
 
 const getAllUSers = async (dispatch) => {
   const response = await fetch(`${import.meta.env.VITE_BACKEND_ORIGIN}/user`);
@@ -19,7 +19,6 @@ const fetchAllRequests = async (senderId, dispatch) => {
     config
   );
   const data = await response.json();
-  console.log(data);
   dispatch(getRequests(data.allRequests));
 };
 
@@ -63,9 +62,32 @@ const cancelFriendRequest = async (senderId, receiverId, dispatch) => {
   dispatch(getRequests(data.allRequests));
 };
 
+const acceptFriendRequest = async (senderId, receiverId, dispatch) => {
+  const config = {
+    method: "put",
+    withCredentials: true,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      senderId,
+      receiverId,
+    }),
+  };
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_ORIGIN}/user/request`,
+    config
+  );
+  const data = await response.json();
+  console.log(data.user);
+  dispatch(getRequests(data.allRequests));
+  dispatch(login(data.user));
+};
+
 export {
   getAllUSers,
   sendFriendRequest,
   fetchAllRequests,
   cancelFriendRequest,
+  acceptFriendRequest,
 };

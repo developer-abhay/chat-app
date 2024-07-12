@@ -25,18 +25,22 @@ import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
 import SearchInput from "./SearchInput";
 import {
+  acceptFriendRequest,
   cancelFriendRequest,
-  fetchAllRequests,
   sendFriendRequest,
 } from "../../api/api";
 import { useDispatch, useSelector } from "react-redux";
 
-export default function NavbarDialogComponent({ user, Icon, text }) {
+export default function NavbarDialogComponent({
+  user,
+  Icon,
+  text,
+  myNotifications,
+  setMyNotifications,
+}) {
   const allUsers = useSelector((state) => state.allUsers);
   const requests = useSelector((state) => state.requests);
   const [open, setOpen] = useState(false);
-
-  const dispatch = useDispatch();
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -45,10 +49,6 @@ export default function NavbarDialogComponent({ user, Icon, text }) {
   const handleClose = () => {
     setOpen(false);
   };
-
-  useEffect(() => {
-    fetchAllRequests(user._id, dispatch);
-  }, []);
   return (
     <>
       <IconButton size="large" color="inherit" onClick={handleClickOpen}>
@@ -70,13 +70,17 @@ export default function NavbarDialogComponent({ user, Icon, text }) {
           allUsers={allUsers}
         />
       )} */}
-      {/* {text == "Notifications" && (
+      {text == "Notifications" && (
         <NotificationDialog
+          myNotifications={myNotifications}
+          setMyNotifications={setMyNotifications}
           open={open}
           onClose={handleClose}
+          user={user}
           allUsers={allUsers}
+          requests={requests}
         />
-      )} */}
+      )}
     </>
   );
 }
@@ -103,7 +107,7 @@ function AddFriendDialog({ user, onClose, open, allUsers, requests }) {
           {allUsers.length > 0 &&
             allUsers.map(({ _id, avatar, username }) => {
               const request = Boolean(
-                requests.find(({ receiverId }) => receiverId == _id)
+                requests?.find(({ receiverId }) => receiverId == _id)
               );
 
               if (user._id == _id || user.friends.includes(_id)) return;
@@ -200,54 +204,91 @@ function AddFriendDialog({ user, onClose, open, allUsers, requests }) {
 // }
 
 // Notifications Dialogue
-// function NotificationDialog({ onClose, open, allUsers }) {
-//   return (
-//     <Dialog maxWidth="md" onClose={onClose} open={open}>
-//       <Box sx={{ p: 3 }}>
-//         <DialogTitle sx={{ textAlign: "center", py: 0 }}>
-//           Accept Requests
-//         </DialogTitle>
-//         <List
-//           sx={{
-//             overflow: "scroll",
-//             maxHeight: "280px",
-//           }}
-//         >
-//           {allUsers.map(({ avatar, username }) => (
-//             <ListItem disableGutters key={username}>
-//               <ListItemAvatar>
-//                 <Avatar
-//                   src={avatar}
-//                   sx={{ bgcolor: blue[100], color: blue[600] }}
-//                 >
-//                   <PersonIcon />
-//                 </Avatar>
-//               </ListItemAvatar>
-//               <ListItemText primary={username} />
+function NotificationDialog({
+  onClose,
+  open,
+  requests,
+  user,
+  allUsers,
+  myNotifications,
+  setMyNotifications,
+}) {
+  const dispatch = useDispatch();
+  const acceptRequest = (senderId) => {
+    acceptFriendRequest(senderId, user._id, dispatch);
+  };
 
-//               <IconButton
-//                 color="error"
-//                 sx={{
-//                   // backgroundColor: "#555",
-//                   ":hover": { backgroundColor: "#ddd" },
-//                   ml: 2,
-//                 }}
-//               >
-//                 <CloseIcon />
-//               </IconButton>
-//               <IconButton
-//                 color="success"
-//                 sx={{
-//                   // backgroundColor: "#eee",
-//                   ":hover": { backgroundColor: "#ddd" },
-//                 }}
-//               >
-//                 <DoneIcon />
-//               </IconButton>
-//             </ListItem>
-//           ))}
-//         </List>
-//       </Box>
-//     </Dialog>
-//   );
-// }
+  const rejectRequest = (senderId) => {
+    cancelFriendRequest(senderId, user._id, dispatch);
+  };
+
+  useEffect(() => {
+    const notifyArray = requests.filter(
+      ({ receiverId }) => user._id == receiverId
+    );
+    setMyNotifications(notifyArray);
+  }, [requests]);
+
+  return (
+    <Dialog maxWidth="md" onClose={onClose} open={open}>
+      <Box sx={{ p: 3 }}>
+        <DialogTitle sx={{ textAlign: "center", py: 0 }}>
+          {myNotifications.length == 0 ? "No Requests" : "Accept Requests"}
+        </DialogTitle>
+
+        {myNotifications.length != 0 && (
+          <List
+            sx={{
+              overflow: "scroll",
+              maxHeight: "280px",
+            }}
+          >
+            {allUsers.map(({ _id, avatar, username }) => {
+              const notify = Boolean(
+                myNotifications.find(({ senderId }) => senderId == _id)
+              );
+
+              if (!notify) return;
+
+              return (
+                <ListItem disableGutters key={username}>
+                  <ListItemAvatar>
+                    <Avatar
+                      src={avatar}
+                      sx={{ bgcolor: blue[100], color: blue[600] }}
+                    >
+                      <PersonIcon />
+                    </Avatar>
+                  </ListItemAvatar>
+                  <ListItemText primary={username} />
+
+                  <IconButton
+                    color="error"
+                    sx={{
+                      // backgroundColor: "#555",
+                      ":hover": { backgroundColor: "#ddd" },
+                      ml: 2,
+                    }}
+                    onClick={() => rejectRequest(_id)}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                  <IconButton
+                    color="success"
+                    sx={{
+                      // backgroundColor: "#eee",
+                      ":hover": { backgroundColor: "#ddd" },
+                    }}
+                    onClick={() => acceptRequest(_id)}
+                  >
+                    <DoneIcon />
+                  </IconButton>
+                </ListItem>
+              );
+            })}
+          </List>
+        )}
+      </Box>
+    </Dialog>
+  );
+}
