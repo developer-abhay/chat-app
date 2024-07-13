@@ -5,7 +5,7 @@ const {
   upload,
 } = require("../middlewares/index");
 const path = require("path");
-const { User, Request } = require("../db");
+const { User, Request, Chat } = require("../db");
 const route = Router();
 const { uploadToCloudinary } = require("../utils/cloudinary");
 const { resolveSoa } = require("dns");
@@ -136,6 +136,38 @@ route.put("/request", async (req, res) => {
     user: updatedUser,
     allRequests,
   });
+});
+
+// Create group request
+route.post("/createchat", async (req, res) => {
+  const { creator, groupName, members } = req.body;
+
+  if (groupName) {
+    await Chat.create({
+      members: [...members, creator],
+      groupChat: {
+        name: groupName,
+        avatar: "",
+        creator,
+      },
+      lastMessage: "Hello",
+    });
+  } else {
+    await Chat.create({
+      members,
+      groupChat: null,
+      lastMessage: "Hello",
+    });
+  }
+});
+
+//Get all chats
+route.get("/chats/:userId", async (req, res) => {
+  const { userId } = req.params;
+
+  const allUserChats = await Chat.find({ members: userId });
+
+  res.status(200).send({ allUserChats });
 });
 
 module.exports = { route };

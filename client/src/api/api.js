@@ -1,4 +1,4 @@
-import { getRequests, getUsers, login } from "../redux/UserSlice";
+import { getChats, getRequests, getUsers, login } from "../redux/UserSlice";
 
 const getAllUSers = async (dispatch) => {
   const response = await fetch(`${import.meta.env.VITE_BACKEND_ORIGIN}/user`);
@@ -84,10 +84,50 @@ const acceptFriendRequest = async (senderId, receiverId, dispatch) => {
   dispatch(login(data.user));
 };
 
+const createGroupAPI = async (creator, groupName, members) => {
+  const config = {
+    method: "post",
+    withCredentials: true,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      creator,
+      groupName,
+      members,
+    }),
+  };
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_ORIGIN}/user/createchat`,
+    config
+  );
+
+  const data = await response.json();
+  console.log(data);
+};
+
+const fetchAllChats = async (userId, dispatch) => {
+  const config = {
+    method: "get",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  };
+
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_ORIGIN}/user/chats/${userId}`,
+    config
+  );
+  const data = await response.json();
+  dispatch(getChats(data.allUserChats));
+};
+
 export {
   getAllUSers,
   sendFriendRequest,
   fetchAllRequests,
   cancelFriendRequest,
   acceptFriendRequest,
+  createGroupAPI,
+  fetchAllChats,
 };

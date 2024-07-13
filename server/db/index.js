@@ -23,7 +23,18 @@ const RequestSchema = new mongoose.Schema({
   },
 });
 
+const ChatSchema = new mongoose.Schema({
+  members: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  groupChat: {
+    name: { type: String },
+    avatar: { type: String },
+    creator: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  },
+  lastMessage: String,
+});
+
 const User = mongoose.model("user", UserSchema);
 const Request = mongoose.model("request", RequestSchema);
+const Chat = mongoose.model("chat", ChatSchema);
 
-module.exports = { User, Request };
+module.exports = { User, Request, Chat };

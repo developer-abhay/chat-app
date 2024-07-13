@@ -21,13 +21,9 @@ import { orangePrimary } from "../../constants/colors";
 
 import NavbarDialogComponent from "../shared/NavDialog";
 import UserProfile from "../shared/UserProfile";
-import { fetchAllRequests } from "../../api/api";
 
 function Header() {
   const user = useSelector((state) => state.user);
-  const dispatch = useDispatch();
-
-  const [myNotifications, setMyNotifications] = useState([]);
 
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
@@ -112,9 +108,6 @@ function Header() {
     </Menu>
   );
 
-  useEffect(() => {
-    fetchAllRequests(user._id, dispatch);
-  }, []);
   return (
     <Box sx={{ height: "70px" }}>
       <AppBar position="static" sx={{ height: "100%", bgcolor: orangePrimary }}>
@@ -151,10 +144,8 @@ function Header() {
             <NavbarDialogComponent
               user={user}
               text="Notifications"
-              myNotifications={myNotifications}
-              setMyNotifications={setMyNotifications}
               Icon={
-                <Badge badgeContent={myNotifications.length} color="error">
+                <Badge color="error">
                   <NotificationsIcon />
                 </Badge>
               }

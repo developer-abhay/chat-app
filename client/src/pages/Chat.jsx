@@ -20,12 +20,15 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import AppLayout from "../components/layout/AppLayout";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { Chats, messages, Users } from "../constants/sampleData";
+import { Chats, messages } from "../constants/sampleData";
 
 const Chat = () => {
   const user = useSelector((state) => state.user);
+  const allUsers = useSelector((state) => state.allUsers);
+  const userChats = useSelector((state) => state.chats);
   const chatId = useSelector((state) => state.chatId);
-  const [chatSender, setChatSender] = useState(null);
+
+  const [currentChat, setCurrentChat] = useState({});
 
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -41,14 +44,19 @@ const Chat = () => {
   useEffect(() => {
     const chatBox = document.getElementById("messageBody");
     chatBox.scrollTop = chatBox.scrollHeight;
-
-    const isGroup = Chats.find((chat) => chat._id == chatId).groupChat;
-    if (!isGroup) {
-      const members = Chats.find((chat) => chat._id == chatId).members;
-      const chatSenderId = user._id == members[0] ? members[1] : members[0];
-      setChatSender(Users.find((user) => user._id == chatSenderId));
-    }
+    setCurrentChat(userChats.find((chat) => chat._id == chatId));
   }, [chatId]);
+
+  useEffect(() => {
+    console.log(currentChat);
+    //   const members = userChats.find((chat) => chat._id == chatId)?.members;
+    //   console.log(members);
+    //   const chatSenderId = user._id == members[0] ? members[1] : members[0];
+    // } else {
+    //   const members = userChats.find((chat) => chat._id == chatId)?.members;
+    // }
+  }, [currentChat]);
+
   return (
     <Container
       disableGutters
@@ -67,12 +75,14 @@ const Chat = () => {
         }}
       >
         <Avatar
-          src={chatSender?.avatar}
+          src={currentChat.groupChat ? currentChat.groupChat.avatar : ""}
           alt="User-profile"
           sx={{ width: 52, height: 52, mr: 2 }}
         />
         <div style={{ flex: 1 }}>
-          <h3 style={{ mb: 1, fontWeight: 500 }}>{chatSender?.name}</h3>
+          <h3 style={{ mb: 1, fontWeight: 500 }}>
+            {currentChat.groupChat ? currentChat.groupChat.name : ""}
+          </h3>
           <p style={{ color: "gray" }}>
             Last seen Fri,04 Sep 2020 18:00:16 GMT
           </p>

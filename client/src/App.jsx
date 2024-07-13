@@ -4,7 +4,7 @@ import ProtectRoute from "./components/auth/ProtectRoute";
 import "./index.css";
 import Loaders from "./components/layout/Loaders";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAllRequests, getAllUSers } from "./api/api";
+import { fetchAllChats, fetchAllRequests, getAllUSers } from "./api/api";
 
 const Login = lazy(() => import("./pages/Login"));
 const Home = lazy(() => import("./pages/Home"));
@@ -17,8 +17,12 @@ const App = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    getAllUSers(dispatch);
-  }, []);
+    if (user) {
+      getAllUSers(dispatch);
+      fetchAllRequests(user._id, dispatch);
+      fetchAllChats(user._id, dispatch);
+    }
+  }, [user]);
 
   return (
     <Router>

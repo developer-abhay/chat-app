@@ -1,3 +1,5 @@
+import * as React from "react";
+
 import { useState, useEffect } from "react";
 
 import {
@@ -27,19 +29,15 @@ import SearchInput from "./SearchInput";
 import {
   acceptFriendRequest,
   cancelFriendRequest,
+  createGroupAPI,
   sendFriendRequest,
 } from "../../api/api";
 import { useDispatch, useSelector } from "react-redux";
 
-export default function NavbarDialogComponent({
-  user,
-  Icon,
-  text,
-  myNotifications,
-  setMyNotifications,
-}) {
+export default function NavbarDialogComponent({ user, Icon, text }) {
   const allUsers = useSelector((state) => state.allUsers);
   const requests = useSelector((state) => state.requests);
+  const [myNotifications, setMyNotifications] = useState([]);
   const [open, setOpen] = useState(false);
 
   const handleClickOpen = () => {
@@ -49,6 +47,13 @@ export default function NavbarDialogComponent({
   const handleClose = () => {
     setOpen(false);
   };
+
+  // If notification item
+  if (Icon.type.propTypes) {
+    Icon = React.cloneElement(Icon, {
+      badgeContent: myNotifications.length, // Set the badgeContent directly on the Badge component
+    });
+  }
   return (
     <>
       <IconButton size="large" color="inherit" onClick={handleClickOpen}>
@@ -63,22 +68,23 @@ export default function NavbarDialogComponent({
           requests={requests}
         />
       )}
-      {/* {text == "Create Group" && (
+      {text == "Create Group" && (
         <CreateGroupDialog
           open={open}
           onClose={handleClose}
           allUsers={allUsers}
+          user={user}
         />
-      )} */}
+      )}
       {text == "Notifications" && (
         <NotificationDialog
-          myNotifications={myNotifications}
-          setMyNotifications={setMyNotifications}
           open={open}
           onClose={handleClose}
           user={user}
           allUsers={allUsers}
           requests={requests}
+          myNotifications={myNotifications}
+          setMyNotifications={setMyNotifications}
         />
       )}
     </>
@@ -143,65 +149,6 @@ function AddFriendDialog({ user, onClose, open, allUsers, requests }) {
     </Dialog>
   );
 }
-
-// Create New group Dialog
-// function CreateGroupDialog({ onClose, open, allUsers }) {
-//   return (
-//     <Dialog maxWidth="md" onClose={onClose} open={open}>
-//       <Box sx={{ p: 2, px: 3 }}>
-//         <DialogTitle sx={{ textAlign: "center", py: 0 }}>
-//           Create New Group
-//         </DialogTitle>
-//         <TextField
-//           sx={{ pt: 1, pb: 2 }}
-//           type="text"
-//           size="small"
-//           placeholder="Enter group name"
-//         />
-//         <Typography>Add Members</Typography>
-//         <List
-//           sx={{
-//             overflow: "scroll",
-//             maxHeight: "280px",
-//           }}
-//         >
-//           {allUsers.map(({ avatar, username }) => (
-//             <ListItem disableGutters key={username}>
-//               <ListItemAvatar>
-//                 <Avatar
-//                   src={avatar}
-//                   sx={{ bgcolor: blue[100], color: blue[600] }}
-//                 >
-//                   <PersonIcon />
-//                 </Avatar>
-//               </ListItemAvatar>
-//               <ListItemText primary={username} />
-
-//               <IconButton
-//                 sx={{
-//                   backgroundColor: "#eee",
-//                   ":hover": { backgroundColor: "#ddd" },
-//                 }}
-//               >
-//                 {/* {request ? <RemoveIcon /> : <AddIcon />} */}
-//                 <AddIcon />
-//               </IconButton>
-//             </ListItem>
-//           ))}
-//         </List>
-//         <Stack
-//           direction="row"
-//           sx={{ mt: 3, gap: 4, justifyContent: "space-between" }}
-//         >
-//           <Button variant="outlined" color="error">
-//             Cancel
-//           </Button>
-//           <Button variant="contained">Create</Button>
-//         </Stack>
-//       </Box>
-//     </Dialog>
-//   );
-// }
 
 // Notifications Dialogue
 function NotificationDialog({
@@ -288,6 +235,85 @@ function NotificationDialog({
             })}
           </List>
         )}
+      </Box>
+    </Dialog>
+  );
+}
+
+// Create New group Dialog
+function CreateGroupDialog({ onClose, open, allUsers, user }) {
+  const [groupName, setGroupName] = useState("");
+  const [groupMembers, setGroupMembers] = useState([]);
+
+  const createGroup = () => {
+    createGroupAPI(user._id, groupName, groupMembers);
+  };
+
+  const updateMembers = (memberId) => {
+    setGroupMembers([...groupMembers, memberId]);
+  };
+
+  return (
+    <Dialog maxWidth="md" onClose={onClose} open={open}>
+      <Box sx={{ p: 2, px: 3 }}>
+        <DialogTitle sx={{ textAlign: "center", py: 0 }}>
+          Create New Group
+        </DialogTitle>
+        <TextField
+          sx={{ pt: 1, pb: 2 }}
+          type="text"
+          size="small"
+          placeholder="Enter group name"
+          value={groupName}
+          onChange={(e) => setGroupName(e.target.value)}
+        />
+        <Typography>Add Members</Typography>
+        <List
+          sx={{
+            overflow: "scroll",
+            maxHeight: "280px",
+          }}
+        >
+          {allUsers.map(({ _id, avatar, username }) => {
+            if (user._id == _id || !user.friends.includes(_id)) return;
+
+            return (
+              <ListItem disableGutters key={username}>
+                <ListItemAvatar>
+                  <Avatar
+                    src={avatar}
+                    sx={{ bgcolor: blue[100], color: blue[600] }}
+                  >
+                    <PersonIcon />
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText primary={username} />
+
+                <IconButton
+                  sx={{
+                    backgroundColor: "#eee",
+                    ":hover": { backgroundColor: "#ddd" },
+                  }}
+                  onClick={() => updateMembers(_id)}
+                >
+                  {/* {request ? <RemoveIcon /> : <AddIcon />} */}
+                  <AddIcon />
+                </IconButton>
+              </ListItem>
+            );
+          })}
+        </List>
+        <Stack
+          direction="row"
+          sx={{ mt: 3, gap: 4, justifyContent: "space-between" }}
+        >
+          <Button variant="outlined" color="error">
+            Cancel
+          </Button>
+          <Button variant="contained" onClick={createGroup}>
+            Create
+          </Button>
+        </Stack>
       </Box>
     </Dialog>
   );
