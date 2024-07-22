@@ -14,6 +14,7 @@ import { validateFormInput } from "../utils/validators";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../redux/UserSlice";
+import { loginUserAPI, registerUserAPI } from "../api/api";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -34,35 +35,13 @@ const Login = () => {
   };
 
   // Login Function
-  const loginUser = async (e) => {
+  const loginUser = (e) => {
     e.preventDefault();
-
-    const config = {
-      method: "post",
-      withCredentials: true,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        username: userName,
-        password: password,
-      }),
-    };
-    const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_ORIGIN}/user/login`,
-      config
-    );
-    if (response.ok) {
-      const data = await response.json();
-      dispatch(login(data.user));
-      navigate("/");
-    } else {
-      console.log("There was some error");
-    }
+    loginUserAPI(userName, password, dispatch);
   };
 
   // SignUp Function
-  const registerUser = async (e) => {
+  const registerUser = (e) => {
     e.preventDefault();
     // validateFormInput(profilePhoto, name, userName, password);
 
@@ -73,29 +52,7 @@ const Login = () => {
     signupForm.append("bio", bio);
     signupForm.append("avatar", profilePhoto);
 
-    const config = {
-      method: "post",
-      withCredentials: true,
-      body: signupForm,
-    };
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_ORIGIN}/user/signup`,
-        config
-      );
-
-      if (!response.ok) {
-        const error = await response.json();
-        console.log(error.message);
-      }
-      if (response.ok) {
-        const data = await response.json();
-        dispatch(login(data.user));
-        navigate("/");
-      }
-    } catch (err) {
-      console.log(err);
-    }
+    registerUserAPI(signupForm, dispatch);
   };
 
   return (

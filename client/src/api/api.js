@@ -1,9 +1,63 @@
 import { getChats, getRequests, getUsers, login } from "../redux/UserSlice";
 
+const loginUserAPI = async (username, password, dispatch) => {
+  const config = {
+    method: "post",
+    withCredentials: true,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      username,
+      password,
+    }),
+  };
+
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_ORIGIN}/user/login`,
+    config
+  );
+
+  if (response.ok) {
+    const data = await response.json();
+    dispatch(login(data.user));
+    navigate("/");
+  } else {
+    console.log("There was some error");
+  }
+};
+
+const registerUserAPI = async (signupForm, dispatch) => {
+  const config = {
+    method: "post",
+    withCredentials: true,
+    body: signupForm,
+  };
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_ORIGIN}/user/signup`,
+      config
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.log(error.message);
+    }
+    if (response.ok) {
+      const data = await response.json();
+      dispatch(login(data.user));
+      navigate("/");
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 const getAllUSers = async (dispatch) => {
   const response = await fetch(`${import.meta.env.VITE_BACKEND_ORIGIN}/user`);
   const allUsers = await response.json();
   dispatch(getUsers(allUsers.users));
+  console.log(allUsers.users);
 };
 
 const fetchAllRequests = async (senderId, dispatch) => {
@@ -123,6 +177,8 @@ const fetchAllChats = async (userId, dispatch) => {
 };
 
 export {
+  loginUserAPI,
+  registerUserAPI,
   getAllUSers,
   sendFriendRequest,
   fetchAllRequests,

@@ -1,7 +1,7 @@
 import { Box, TextField } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 
-const SearchInput = ({ placeholder }) => {
+const SearchInput = ({ placeholder, onChange, value }) => {
   return (
     <Box
       sx={{
@@ -26,6 +26,8 @@ const SearchInput = ({ placeholder }) => {
         }}
         type="text"
         placeholder={placeholder}
+        onChange={onChange}
+        value={value}
       />
     </Box>
   );

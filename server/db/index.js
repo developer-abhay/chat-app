@@ -30,7 +30,15 @@ const ChatSchema = new mongoose.Schema({
     avatar: { type: String },
     creator: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
-  lastMessage: String,
+  lastMessage: { type: String, default: "" },
+});
+
+const MessageSchema = new mongoose.Schema({
+  content: { type: String },
+  senderId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  chatId: { type: mongoose.Schema.Types.ObjectId, ref: "Chat" },
+  attachments: String,
+  timeStamp: { type: String, default: new Date().toDateString() },
 });
 
 const User = mongoose.model("user", UserSchema);

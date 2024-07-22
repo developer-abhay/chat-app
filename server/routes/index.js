@@ -97,6 +97,7 @@ route.delete("/request", async (req, res) => {
   const allRequests = await Request.find({
     $or: [{ receiverId }, { senderId }],
   });
+
   res.status(200).json({ allRequests });
 });
 
@@ -105,6 +106,7 @@ route.put("/request", async (req, res) => {
   const { senderId, receiverId } = req.body;
 
   const receiver = await User.findOne({ _id: receiverId });
+
   if (!receiver) {
     return res.status(404).json({ message: "Receiver not found" });
   }
@@ -121,6 +123,10 @@ route.put("/request", async (req, res) => {
     { _id: senderId },
     { $push: { friends: receiverId } }
   );
+  await Chat.create({
+    members: [receiverId, senderId],
+    groupChat: null,
+  });
 
   await Request.findOneAndDelete({
     senderId,

@@ -61,9 +61,12 @@ const UserProfile = ({ user, isMenuOpen, handleMenuOpen, handleMenuClose }) => {
           <Stack direction="row" sx={{ gap: 1, alignItems: "center" }}>
             <Avatar src={user.avatar} />
             <div>
-              <Typography>{user.username}</Typography>
+              <Typography sx={{ fontWeight: "600" }}>
+                {user.username}
+              </Typography>
               <Typography sx={{ fontSize: "12px", color: "#aaa" }}>
-                Joined: {user.joinedAt}
+                Joined:{" "}
+                <span style={{ fontWeight: "600" }}>{user.created_at} </span>
               </Typography>
             </div>
           </Stack>

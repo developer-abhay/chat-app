@@ -103,7 +103,7 @@ function AddFriendDialog({ user, onClose, open, allUsers, requests }) {
   return (
     <Dialog maxWidth="md" onClose={onClose} open={open}>
       <Box sx={{ p: 2 }}>
-        <SearchInput placeholder="Search Friends" />
+        <SearchInput placeholder="Search People" />
         <List
           sx={{
             overflow: "scroll",
@@ -130,17 +130,21 @@ function AddFriendDialog({ user, onClose, open, allUsers, requests }) {
                   </ListItemAvatar>
                   <ListItemText primary={username} />
 
-                  <IconButton
-                    sx={{
-                      backgroundColor: "#eee",
-                      ":hover": { backgroundColor: "#ddd" },
-                    }}
-                    onClick={() =>
-                      request ? cancelRequest(_id) : sendRequest(_id)
-                    }
+                  <Tooltip
+                    title={`${request ? "Cancel Request" : "Send Request"}`}
                   >
-                    {request ? <RemoveIcon /> : <AddIcon />}
-                  </IconButton>
+                    <IconButton
+                      sx={{
+                        backgroundColor: "#eee",
+                        ":hover": { backgroundColor: "#ddd" },
+                      }}
+                      onClick={() =>
+                        request ? cancelRequest(_id) : sendRequest(_id)
+                      }
+                    >
+                      {request ? <RemoveIcon /> : <AddIcon />}
+                    </IconButton>
+                  </Tooltip>
                 </ListItem>
               );
             })}
@@ -246,11 +250,20 @@ function CreateGroupDialog({ onClose, open, allUsers, user }) {
   const [groupMembers, setGroupMembers] = useState([]);
 
   const createGroup = () => {
-    createGroupAPI(user._id, groupName, groupMembers);
+    if (groupMembers.length < 3) {
+      console.log("Group Should have atleast 3 members");
+    } else {
+      createGroupAPI(user._id, groupName, groupMembers);
+    }
   };
 
-  const updateMembers = (memberId) => {
-    setGroupMembers([...groupMembers, memberId]);
+  const updateMembers = (addedToGroup, memberId) => {
+    if (addedToGroup) {
+      setGroupMembers(groupMembers.filter((id) => id !== memberId));
+    } else {
+      setGroupMembers([...groupMembers, memberId]);
+    }
+    console.log(groupMembers);
   };
 
   return (
@@ -276,7 +289,7 @@ function CreateGroupDialog({ onClose, open, allUsers, user }) {
         >
           {allUsers.map(({ _id, avatar, username }) => {
             if (user._id == _id || !user.friends.includes(_id)) return;
-
+            const addedToGroup = groupMembers.includes(_id);
             return (
               <ListItem disableGutters key={username}>
                 <ListItemAvatar>
@@ -288,17 +301,17 @@ function CreateGroupDialog({ onClose, open, allUsers, user }) {
                   </Avatar>
                 </ListItemAvatar>
                 <ListItemText primary={username} />
-
-                <IconButton
-                  sx={{
-                    backgroundColor: "#eee",
-                    ":hover": { backgroundColor: "#ddd" },
-                  }}
-                  onClick={() => updateMembers(_id)}
-                >
-                  {/* {request ? <RemoveIcon /> : <AddIcon />} */}
-                  <AddIcon />
-                </IconButton>
+                <Tooltip title={`${addedToGroup ? "Remove" : "Add Request"}`}>
+                  <IconButton
+                    sx={{
+                      backgroundColor: "#eee",
+                      ":hover": { backgroundColor: "#ddd" },
+                    }}
+                    onClick={() => updateMembers(addedToGroup, _id)}
+                  >
+                    {addedToGroup ? <RemoveIcon /> : <AddIcon />}
+                  </IconButton>
+                </Tooltip>
               </ListItem>
             );
           })}
@@ -307,7 +320,7 @@ function CreateGroupDialog({ onClose, open, allUsers, user }) {
           direction="row"
           sx={{ mt: 3, gap: 4, justifyContent: "space-between" }}
         >
-          <Button variant="outlined" color="error">
+          <Button variant="outlined" color="error" onClick={onClose}>
             Cancel
           </Button>
           <Button variant="contained" onClick={createGroup}>
