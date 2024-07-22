@@ -5,10 +5,9 @@ const {
   upload,
 } = require("../middlewares/index");
 const path = require("path");
-const { User, Request, Chat } = require("../db");
+const { User, Request, Chat, Message } = require("../db");
 const route = Router();
 const { uploadToCloudinary } = require("../utils/cloudinary");
-const { resolveSoa } = require("dns");
 
 // Get all Users
 route.get("/", async (req, res) => {
@@ -145,7 +144,7 @@ route.put("/request", async (req, res) => {
 });
 
 // Create group request
-route.post("/createchat", async (req, res) => {
+route.post("/creategroup", async (req, res) => {
   const { creator, groupName, members } = req.body;
 
   if (groupName) {
@@ -174,6 +173,31 @@ route.get("/chats/:userId", async (req, res) => {
   const allUserChats = await Chat.find({ members: userId });
 
   res.status(200).send({ allUserChats });
+});
+
+// Get all Chat Message
+route.get("/message/:chatId", async (req, res) => {
+  const { chatId } = req.params;
+
+  const allMessages = await Message.find({
+    chatId,
+  });
+  res.status(200).send({ allMessages });
+});
+
+//Send Message
+route.post("/message", async (req, res) => {
+  const { chatId, content, senderId } = req.body;
+
+  const message = await Message.create({
+    chatId,
+    content,
+    senderId,
+  });
+
+  await Chat.findOneAndUpdate({ _id: chatId }, { lastMessage: content });
+
+  res.status(200).send({ message });
 });
 
 module.exports = { route };

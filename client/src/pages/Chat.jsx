@@ -1,6 +1,7 @@
 import {
   Avatar,
   Box,
+  Button,
   Container,
   IconButton,
   Menu,
@@ -8,7 +9,6 @@ import {
   TextField,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import SearchIcon from "@mui/icons-material/Search";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import SendIcon from "@mui/icons-material/Send";
 import SentimentVerySatisfiedIcon from "@mui/icons-material/SentimentVerySatisfied";
@@ -20,9 +20,9 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import AppLayout from "../components/layout/AppLayout";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { messages } from "../constants/sampleData";
 
 import { format } from "date-fns";
+import { getChatMessages, sendChatMessages } from "../api/api";
 
 const Chat = () => {
   const user = useSelector((state) => state.user);
@@ -32,8 +32,7 @@ const Chat = () => {
 
   const [currentChat, setCurrentChat] = useState({});
   const [chatMessages, setChatMessages] = useState([]);
-
-  const [members, setChatMembers] = useState([]);
+  const [typedMessage, setTypedMessage] = useState("");
 
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -46,22 +45,26 @@ const Chat = () => {
     setAnchorEl(null);
   };
 
+  const fetchMessages = async () => {
+    const allMessages = await getChatMessages(chatId);
+    setChatMessages(allMessages);
+  };
+
+  const sendMessage = async (e) => {
+    e.preventDefault();
+    await sendChatMessages(chatId, user._id, typedMessage);
+    setTypedMessage("");
+    fetchMessages();
+  };
+
   useEffect(() => {
     const chatBox = document.getElementById("messageBody");
     chatBox.scrollTop = chatBox.scrollHeight;
     setCurrentChat(userChats.find((chat) => chat._id == chatId));
-    setChatMessages(messages.filter((message) => message.chatId == chatId));
   }, [chatId]);
 
   useEffect(() => {
-    setChatMembers(currentChat.members);
-
-    //   const members = userChats.find((chat) => chat._id == chatId)?.members;
-    //   console.log(members);
-    //   const chatSenderId = user._id == members[0] ? members[1] : members[0];
-    // } else {
-    //   const members = userChats.find((chat) => chat._id == chatId)?.members;
-    // }
+    fetchMessages();
   }, [currentChat]);
 
   return (
@@ -143,71 +146,75 @@ const Chat = () => {
         ))}
       </Box>
       {/* Chat Input */}
-      <Box sx={{ backgroundColor: "lightgray", display: "flex" }}>
-        <IconButton
-          id="basic-button"
-          aria-controls={open ? "basic-menu" : undefined}
-          aria-haspopup="true"
-          aria-expanded={open ? "true" : undefined}
-          onClick={handleAttachFile}
-        >
-          <AttachFileIcon />
-        </IconButton>
+      <form onSubmit={sendMessage}>
+        <Box sx={{ backgroundColor: "lightgray", display: "flex" }}>
+          <IconButton
+            id="basic-button"
+            aria-controls={open ? "basic-menu" : undefined}
+            aria-haspopup="true"
+            aria-expanded={open ? "true" : undefined}
+            onClick={handleAttachFile}
+          >
+            <AttachFileIcon />
+          </IconButton>
 
-        <Menu
-          id="basic-menu"
-          anchorEl={anchorEl}
-          open={open}
-          onClose={handleAttachFileClose}
-          MenuListProps={{
-            "aria-labelledby": "basic-button",
-          }}
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "left",
-          }}
-          transformOrigin={{
-            vertical: "bottom",
-            horizontal: "left",
-          }}
-        >
-          <MenuItem onClick={handleAttachFileClose} sx={{ gap: 1 }}>
-            <ImageIcon />
-            Image
-          </MenuItem>
-          <MenuItem onClick={handleAttachFileClose} sx={{ gap: 1 }}>
-            <VideocamIcon />
-            Video
-          </MenuItem>
-          <MenuItem onClick={handleAttachFileClose} sx={{ gap: 1 }}>
-            {" "}
-            <MicIcon />
-            Audio
-          </MenuItem>
-          <MenuItem onClick={handleAttachFileClose} sx={{ gap: 1 }}>
-            {" "}
-            <DescriptionIcon />
-            Docs
-          </MenuItem>
-        </Menu>
-        <IconButton>
-          <SentimentVerySatisfiedIcon />
-        </IconButton>
-        <TextField
-          autoComplete="off"
-          type="input"
-          placeholder="Type a message"
-          sx={{
-            "& fieldset": { border: "none" },
-            width: " 100%",
-            outline: "none",
-            border: "none",
-          }}
-        />
-        <IconButton>
-          <SendIcon />
-        </IconButton>
-      </Box>
+          <Menu
+            id="basic-menu"
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleAttachFileClose}
+            MenuListProps={{
+              "aria-labelledby": "basic-button",
+            }}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "left",
+            }}
+            transformOrigin={{
+              vertical: "bottom",
+              horizontal: "left",
+            }}
+          >
+            <MenuItem onClick={handleAttachFileClose} sx={{ gap: 1 }}>
+              <ImageIcon />
+              Image
+            </MenuItem>
+            <MenuItem onClick={handleAttachFileClose} sx={{ gap: 1 }}>
+              <VideocamIcon />
+              Video
+            </MenuItem>
+            <MenuItem onClick={handleAttachFileClose} sx={{ gap: 1 }}>
+              {" "}
+              <MicIcon />
+              Audio
+            </MenuItem>
+            <MenuItem onClick={handleAttachFileClose} sx={{ gap: 1 }}>
+              {" "}
+              <DescriptionIcon />
+              Docs
+            </MenuItem>
+          </Menu>
+          <IconButton>
+            <SentimentVerySatisfiedIcon />
+          </IconButton>
+          <TextField
+            autoComplete="off"
+            type="input"
+            placeholder="Type a message"
+            sx={{
+              "& fieldset": { border: "none" },
+              width: " 100%",
+              outline: "none",
+              border: "none",
+            }}
+            value={typedMessage}
+            onChange={(e) => setTypedMessage(e.target.value)}
+          />
+          <Button type="submit">
+            <SendIcon />
+          </Button>
+        </Box>
+      </form>
     </Container>
   );
 };

@@ -152,7 +152,7 @@ const createGroupAPI = async (creator, groupName, members) => {
     }),
   };
   const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_ORIGIN}/user/createchat`,
+    `${import.meta.env.VITE_BACKEND_ORIGIN}/user/creategroup`,
     config
   );
 
@@ -176,6 +176,43 @@ const fetchAllChats = async (userId, dispatch) => {
   dispatch(getChats(data.allUserChats));
 };
 
+const getChatMessages = async (chatId) => {
+  const config = {
+    method: "get",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  };
+
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_ORIGIN}/user/message/${chatId}`,
+    config
+  );
+  const data = await response.json();
+  return data.allMessages;
+};
+
+const sendChatMessages = async (chatId, senderId, content) => {
+  const config = {
+    method: "post",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      chatId,
+      content,
+      senderId,
+    }),
+  };
+
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_ORIGIN}/user/message`,
+    config
+  );
+  const data = await response.json();
+  return data.message;
+};
+
 export {
   loginUserAPI,
   registerUserAPI,
@@ -186,4 +223,6 @@ export {
   acceptFriendRequest,
   createGroupAPI,
   fetchAllChats,
+  getChatMessages,
+  sendChatMessages,
 };

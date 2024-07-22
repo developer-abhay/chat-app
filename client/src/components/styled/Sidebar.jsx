@@ -4,7 +4,6 @@ import SearchInput from "../shared/SearchInput";
 import { useDispatch, useSelector } from "react-redux";
 import { updateChatId } from "../../redux/UserSlice";
 import { useState } from "react";
-import { messages } from "../../constants/sampleData";
 
 const Sidebar = () => {
   const user = useSelector((state) => state.user);
@@ -33,6 +32,7 @@ const Sidebar = () => {
     )?._id;
     showCurrentChat(friendChatId);
     navigate(`/chat/${friendId}`);
+    setSearchQuery("");
   };
   return (
     <Container
@@ -100,7 +100,7 @@ const Sidebar = () => {
                     ? allUsers.find((user) => user._id == members[1]).name
                     : allUsers.find((user) => user._id == members[0]).name;
               }
-              if (!messages.find((message) => message.chatId == _id)) {
+              if (!lastMessage) {
                 return;
               }
               return (
