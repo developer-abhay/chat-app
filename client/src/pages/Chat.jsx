@@ -257,7 +257,7 @@ const ChatText = ({ text, timeStamp, senderId, userId, isGroup, allUsers }) => {
           width: "fit-content",
           borderRadius: "12px",
           padding: "5px 12px",
-          backgroundColor: sent ? "aqua" : "lightgray",
+          backgroundColor: sent ? "#F7A4A4" : "lightgray",
           borderTopLeftRadius: sent ? "10px" : "0px",
           borderTopRightRadius: sent ? "0px" : "10px",
           float: "right",
