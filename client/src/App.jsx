@@ -17,7 +17,7 @@ const App = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (user._id) {
+    if (user?._id) {
       getAllUSers(dispatch);
       fetchAllRequests(user._id, dispatch);
       fetchAllChats(user._id, dispatch);

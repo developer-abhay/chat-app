@@ -33,12 +33,10 @@ function Header() {
 
   const handleMenuOpen = () => {
     setIsProfileMenuOpen(true);
-    console.log("open");
   };
 
   const handleMenuClose = () => {
     setIsProfileMenuOpen(false);
-    console.log("close");
     handleMobileMenuClose();
   };
 

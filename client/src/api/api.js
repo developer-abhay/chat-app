@@ -56,7 +56,6 @@ const getAllUSers = async (dispatch) => {
   const response = await fetch(`${import.meta.env.VITE_BACKEND_ORIGIN}/user`);
   const allUsers = await response.json();
   dispatch(getUsers(allUsers.users));
-  console.log(allUsers.users);
 };
 
 const fetchAllRequests = async (senderId, dispatch) => {
