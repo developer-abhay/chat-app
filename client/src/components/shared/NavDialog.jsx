@@ -112,11 +112,11 @@ function AddFriendDialog({ user, onClose, open, allUsers, requests }) {
         >
           {allUsers.length > 0 &&
             allUsers.map(({ _id, avatar, username }) => {
+              if (user._id == _id || user.friends?.includes(_id)) return;
+
               const request = Boolean(
                 requests?.find(({ receiverId }) => receiverId == _id)
               );
-
-              if (user._id == _id || user.friends.includes(_id)) return;
 
               return (
                 <ListItem disableGutters key={username}>
@@ -288,7 +288,7 @@ function CreateGroupDialog({ onClose, open, allUsers, user }) {
           }}
         >
           {allUsers.map(({ _id, avatar, username }) => {
-            if (user._id == _id || !user.friends.includes(_id)) return;
+            if (user._id == _id || !user.friends?.includes(_id)) return;
             const addedToGroup = groupMembers.includes(_id);
             return (
               <ListItem disableGutters key={username}>

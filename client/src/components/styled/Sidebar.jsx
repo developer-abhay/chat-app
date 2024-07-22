@@ -22,7 +22,7 @@ const Sidebar = () => {
   };
   const filteredFriends = allUsers.filter(
     (u) =>
-      user.friends.includes(u._id) &&
+      user.friends?.includes(u._id) &&
       u.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 

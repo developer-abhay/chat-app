@@ -21,7 +21,6 @@ const loginUserAPI = async (username, password, dispatch) => {
   if (response.ok) {
     const data = await response.json();
     dispatch(login(data.user));
-    navigate("/");
   } else {
     console.log("There was some error");
   }
