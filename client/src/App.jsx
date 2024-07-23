@@ -1,32 +1,42 @@
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ProtectRoute from "./components/auth/ProtectRoute";
 import "./index.css";
-import Loaders from "./components/layout/Loaders";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAllChats, fetchAllRequests, getAllUSers } from "./api/api";
+import Loader from "./components/layout/Loaders";
 
 const Login = lazy(() => import("./pages/Login"));
 const Home = lazy(() => import("./pages/Home"));
 const Chat = lazy(() => import("./pages/Chat"));
 const Groups = lazy(() => import("./pages/Groups"));
 
-const App = () => {
-  const user = useSelector((state) => state.user);
+//Socket Connection
+import socketIO from "socket.io-client";
+export const socket = socketIO.connect("http://localhost:3000");
 
+const App = () => {
+  const [loading, setLoading] = useState(false);
+  const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
   useEffect(() => {
+    async function fetchInitialData() {
+      await getAllUSers(dispatch);
+      await fetchAllRequests(user._id, dispatch);
+      await fetchAllChats(user._id, dispatch);
+      setLoading(false);
+    }
+
     if (user?._id) {
-      getAllUSers(dispatch);
-      fetchAllRequests(user._id, dispatch);
-      fetchAllChats(user._id, dispatch);
+      setLoading(true);
+      fetchInitialData();
     }
   }, [user]);
 
   return (
     <Router>
-      <Suspense fallback={<Loaders />}>
+      <Suspense fallback={<Loader />}>
         <Routes>
           <Route
             path="/login"
@@ -36,8 +46,12 @@ const App = () => {
               </ProtectRoute>
             }
           />
+
           <Route element={<ProtectRoute user={user} />}>
-            <Route path="/" element={<Home user={user} />} />
+            <Route
+              path="/"
+              element={loading ? <Loader /> : <Home user={user} />}
+            />
             <Route path="/chat/:chatId" element={<Chat />} />
             <Route path="/group" element={<Groups />} />
           </Route>

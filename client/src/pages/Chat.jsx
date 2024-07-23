@@ -22,7 +22,12 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
 import { format } from "date-fns";
-import { getChatMessages, sendChatMessages } from "../api/api";
+import {
+  getChatMessages,
+  // sendChatMessages
+} from "../api/api";
+
+import { socket } from "../App";
 
 const Chat = () => {
   const user = useSelector((state) => state.user);
@@ -52,20 +57,41 @@ const Chat = () => {
 
   const sendMessage = async (e) => {
     e.preventDefault();
-    await sendChatMessages(chatId, user._id, typedMessage);
-    setTypedMessage("");
-    fetchMessages();
+    if (typedMessage.trim()) {
+      const msgObj = {
+        chatId,
+        senderId: user._id,
+        content: typedMessage,
+        timeStamp: new Date().toDateString(),
+      };
+      socket.emit("message", msgObj);
+      setChatMessages((prev) => [...prev, msgObj]);
+      setTypedMessage("");
+    }
   };
+
+  useEffect(() => {
+    setCurrentChat(userChats.find((chat) => chat._id == chatId));
+    fetchMessages();
+  }, [chatId]);
 
   useEffect(() => {
     const chatBox = document.getElementById("messageBody");
     chatBox.scrollTop = chatBox.scrollHeight;
-    setCurrentChat(userChats.find((chat) => chat._id == chatId));
+  }, [chatMessages]);
+
+  useEffect(() => {
+    socket.emit("join-chat", chatId);
   }, [chatId]);
 
   useEffect(() => {
-    fetchMessages();
-  }, [currentChat]);
+    socket.on("messageResponse", (data) => {
+      setChatMessages((prev) => [...prev, data]);
+    });
+    return () => {
+      socket.off("messageResponse");
+    };
+  }, [socket]);
 
   return (
     <Container

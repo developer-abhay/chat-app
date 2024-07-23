@@ -1,13 +1,30 @@
 const bcrypt = require("bcrypt");
 const { User } = require("../db");
-const multer = require("multer");
+const jwt = require("jsonwebtoken");
 
+// Authentication
+const isAuthenticated = async (req, res, next) => {
+  try {
+    const token = req.cookies.token;
+
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+      if (err) {
+        res.status(401).json({ message: "Unauthorized Access" });
+      } else {
+        next();
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+// Login
 const loginMiddleware = async (req, res, next) => {
   const username = req.body.username;
   const password = req.body.password;
 
   const data = await User.findOne({ username });
-
   if (!data) {
     res.status(404).send({ message: "User does not exist" });
   } else {
@@ -63,16 +80,4 @@ const signupMiddleware = async (req, res, next) => {
   }
 };
 
-// Avatar upload middleware
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "./uploads");
-  },
-  filename: function (req, file, cb) {
-    cb(null, file.fieldname + Math.floor(Math.random() * 1000000));
-  },
-});
-
-const upload = multer({ storage: storage });
-
-module.exports = { signupMiddleware, loginMiddleware, upload };
+module.exports = { isAuthenticated, signupMiddleware, loginMiddleware };

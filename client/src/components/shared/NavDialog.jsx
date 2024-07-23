@@ -110,7 +110,7 @@ function AddFriendDialog({ user, onClose, open, allUsers, requests }) {
             maxHeight: "400px",
           }}
         >
-          {allUsers.length > 0 &&
+          {allUsers?.length > 0 &&
             allUsers.map(({ _id, avatar, username }) => {
               if (user._id == _id || user.friends?.includes(_id)) return;
 

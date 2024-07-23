@@ -1,5 +1,6 @@
 import { getChats, getRequests, getUsers, login } from "../redux/UserSlice";
 
+//--------- User APIs --------- //
 const loginUserAPI = async (username, password, dispatch) => {
   const config = {
     method: "post",
@@ -56,8 +57,10 @@ const getAllUSers = async (dispatch) => {
   const response = await fetch(`${import.meta.env.VITE_BACKEND_ORIGIN}/user`);
   const allUsers = await response.json();
   dispatch(getUsers(allUsers.users));
+  return "Success";
 };
 
+// ---------- Request APIs -------------- //
 const fetchAllRequests = async (senderId, dispatch) => {
   const config = {
     method: "get",
@@ -67,11 +70,12 @@ const fetchAllRequests = async (senderId, dispatch) => {
   };
 
   const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_ORIGIN}/user/request/${senderId}`,
+    `${import.meta.env.VITE_BACKEND_ORIGIN}/request/${senderId}`,
     config
   );
   const data = await response.json();
   dispatch(getRequests(data.allRequests));
+  return "Success";
 };
 
 const sendFriendRequest = async (senderId, receiverId, dispatch) => {
@@ -87,7 +91,7 @@ const sendFriendRequest = async (senderId, receiverId, dispatch) => {
     }),
   };
   const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_ORIGIN}/user/request`,
+    `${import.meta.env.VITE_BACKEND_ORIGIN}/request`,
     config
   );
   const data = await response.json();
@@ -107,7 +111,7 @@ const cancelFriendRequest = async (senderId, receiverId, dispatch) => {
     }),
   };
   const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_ORIGIN}/user/request`,
+    `${import.meta.env.VITE_BACKEND_ORIGIN}/request`,
     config
   );
   const data = await response.json();
@@ -127,7 +131,7 @@ const acceptFriendRequest = async (senderId, receiverId, dispatch) => {
     }),
   };
   const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_ORIGIN}/user/request`,
+    `${import.meta.env.VITE_BACKEND_ORIGIN}/request`,
     config
   );
   const data = await response.json();
@@ -136,6 +140,24 @@ const acceptFriendRequest = async (senderId, receiverId, dispatch) => {
   dispatch(login(data.user));
 };
 
+//------------ Chat APIs  ------------ //
+const fetchAllChats = async (userId, dispatch) => {
+  const config = {
+    method: "get",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  };
+
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_ORIGIN}/chat/${userId}`,
+    config
+  );
+  const data = await response.json();
+  dispatch(getChats(data.allUserChats));
+
+  return "Success";
+};
 const createGroupAPI = async (creator, groupName, members) => {
   const config = {
     method: "post",
@@ -150,7 +172,7 @@ const createGroupAPI = async (creator, groupName, members) => {
     }),
   };
   const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_ORIGIN}/user/creategroup`,
+    `${import.meta.env.VITE_BACKEND_ORIGIN}/chat/creategroup`,
     config
   );
 
@@ -158,22 +180,7 @@ const createGroupAPI = async (creator, groupName, members) => {
   console.log(data);
 };
 
-const fetchAllChats = async (userId, dispatch) => {
-  const config = {
-    method: "get",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  };
-
-  const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_ORIGIN}/user/chats/${userId}`,
-    config
-  );
-  const data = await response.json();
-  dispatch(getChats(data.allUserChats));
-};
-
+// ----------- Message APIs ----------- //
 const getChatMessages = async (chatId) => {
   const config = {
     method: "get",
@@ -183,33 +190,33 @@ const getChatMessages = async (chatId) => {
   };
 
   const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_ORIGIN}/user/message/${chatId}`,
+    `${import.meta.env.VITE_BACKEND_ORIGIN}/message/${chatId}`,
     config
   );
   const data = await response.json();
   return data.allMessages;
 };
 
-const sendChatMessages = async (chatId, senderId, content) => {
-  const config = {
-    method: "post",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      chatId,
-      content,
-      senderId,
-    }),
-  };
+// const sendChatMessages = async (chatId, senderId, content) => {
+//   const config = {
+//     method: "post",
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//     body: JSON.stringify({
+//       chatId,
+//       content,
+//       senderId,
+//     }),
+//   };
 
-  const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_ORIGIN}/user/message`,
-    config
-  );
-  const data = await response.json();
-  return data.message;
-};
+//   const response = await fetch(
+//     `${import.meta.env.VITE_BACKEND_ORIGIN}/message`,
+//     config
+//   );
+//   const data = await response.json();
+//   return data.message;
+// };
 
 export {
   loginUserAPI,
@@ -222,5 +229,5 @@ export {
   createGroupAPI,
   fetchAllChats,
   getChatMessages,
-  sendChatMessages,
+  // sendChatMessages,
 };

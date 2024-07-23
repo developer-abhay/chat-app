@@ -13,6 +13,7 @@ import {
 import { orangePrimary } from "../../constants/colors";
 import { useDispatch } from "react-redux";
 import { logout } from "../../redux/UserSlice";
+import { persistor } from "../../redux/store";
 
 const UserProfile = ({ user, isMenuOpen, handleMenuOpen, handleMenuClose }) => {
   const menuId = "primary-search-account-menu";
@@ -89,7 +90,12 @@ const UserProfile = ({ user, isMenuOpen, handleMenuOpen, handleMenuClose }) => {
             sx={{ mt: 5 }}
             variant="outlined"
             color="error"
-            onClick={() => dispatch(logout())}
+            onClick={() => {
+              dispatch(logout());
+              persistor.purge().then(() => {
+                console.log("Persisted state purged successfully");
+              });
+            }}
           >
             Logout
           </Button>

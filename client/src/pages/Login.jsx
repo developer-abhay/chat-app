@@ -17,7 +17,6 @@ import { login } from "../redux/UserSlice";
 import { loginUserAPI, registerUserAPI } from "../api/api";
 
 const Login = () => {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const [isLogin, setIsLogin] = useState(true);
