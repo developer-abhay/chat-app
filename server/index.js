@@ -12,7 +12,11 @@ const { Message, Chat } = require("./db");
 require("dotenv").config();
 
 const corsOptions = {
-  origin: ["https://admin.socket.io", "http://localhost:5173"],
+  origin: [
+    "https://admin.socket.io",
+    "http://localhost:5173",
+    "https://textin.vercel.app",
+  ],
   credentials: true, //access-control-allow-credentials:true
   methods: ["GET", "POST", "PUT", "DELETE"],
   // optionSuccessStatus: 200,
