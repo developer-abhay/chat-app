@@ -20,6 +20,7 @@ const creategroup = async (req, res) => {
       },
       lastMessage: "Hello",
     });
+    console.log(req.body);
   } else {
     await Chat.create({
       members,
@@ -27,6 +28,7 @@ const creategroup = async (req, res) => {
       lastMessage: "Hello",
     });
   }
+  res.status(200).send({ message: "Success" });
 };
 
 module.exports = { getAllChats, creategroup };

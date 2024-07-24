@@ -5,15 +5,12 @@ import "./index.css";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAllChats, fetchAllRequests, getAllUSers } from "./api/api";
 import Loader from "./components/layout/Loaders";
+import { initializeSocket, disconnectSocket } from "./lib/socket";
 
 const Login = lazy(() => import("./pages/Login"));
 const Home = lazy(() => import("./pages/Home"));
 const Chat = lazy(() => import("./pages/Chat"));
 const Groups = lazy(() => import("./pages/Groups"));
-
-//Socket Connection
-import socketIO from "socket.io-client";
-export const socket = socketIO.connect("http://localhost:3000");
 
 const App = () => {
   const [loading, setLoading] = useState(false);
@@ -30,8 +27,13 @@ const App = () => {
 
     if (user?._id) {
       setLoading(true);
+      initializeSocket(user._id);
       fetchInitialData();
     }
+
+    return () => {
+      disconnectSocket();
+    };
   }, [user]);
 
   return (

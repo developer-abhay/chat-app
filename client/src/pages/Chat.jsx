@@ -19,15 +19,17 @@ import DescriptionIcon from "@mui/icons-material/Description";
 
 import AppLayout from "../components/layout/AppLayout";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import { format } from "date-fns";
 import {
+  fetchAllChats,
   getChatMessages,
   // sendChatMessages
 } from "../api/api";
 
-import { socket } from "../App";
+import { getSocket } from "../lib/socket";
+import { getChats } from "../redux/UserSlice";
 
 const Chat = () => {
   const user = useSelector((state) => state.user);
@@ -41,6 +43,8 @@ const Chat = () => {
 
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+
+  const dispatch = useDispatch();
 
   const handleAttachFile = (event) => {
     setAnchorEl(event.currentTarget);
@@ -57,41 +61,59 @@ const Chat = () => {
 
   const sendMessage = async (e) => {
     e.preventDefault();
+    const socket = getSocket();
     if (typedMessage.trim()) {
       const msgObj = {
         chatId,
         senderId: user._id,
         content: typedMessage,
-        timeStamp: new Date().toDateString(),
+        timeStamp: new Date().toISOString(),
       };
       socket.emit("message", msgObj);
+      const updatedChats = userChats.map((chat) =>
+        chat._id == chatId
+          ? {
+              ...chat,
+              lastMessage: {
+                content: typedMessage,
+                timeStamp: new Date().toISOString(),
+              },
+            }
+          : chat
+      );
+      dispatch(getChats(updatedChats));
       setChatMessages((prev) => [...prev, msgObj]);
       setTypedMessage("");
     }
   };
 
   useEffect(() => {
-    setCurrentChat(userChats.find((chat) => chat._id == chatId));
-    fetchMessages();
+    const socket = getSocket();
+
+    if (chatId) {
+      fetchMessages();
+      setCurrentChat(userChats.find((chat) => chat._id == chatId));
+
+      socket.emit("join-chat", chatId);
+      socket.on("messageResponse", ({ data, lastMessage }) => {
+        const updatedChats = userChats.map((chat) =>
+          chat._id == chatId ? { ...chat, lastMessage } : chat
+        );
+        dispatch(getChats(updatedChats));
+        setChatMessages((prev) => [...prev, data]);
+      });
+      return () => {
+        socket.emit("leave-chat", chatId);
+        console.log("message event closed");
+        socket.off("messageResponse");
+      };
+    }
   }, [chatId]);
 
   useEffect(() => {
     const chatBox = document.getElementById("messageBody");
     chatBox.scrollTop = chatBox.scrollHeight;
   }, [chatMessages]);
-
-  useEffect(() => {
-    socket.emit("join-chat", chatId);
-  }, [chatId]);
-
-  useEffect(() => {
-    socket.on("messageResponse", (data) => {
-      setChatMessages((prev) => [...prev, data]);
-    });
-    return () => {
-      socket.off("messageResponse");
-    };
-  }, [socket]);
 
   return (
     <Container

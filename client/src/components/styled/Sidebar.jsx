@@ -3,16 +3,24 @@ import { Link, useNavigate } from "react-router-dom";
 import SearchInput from "../shared/SearchInput";
 import { useDispatch, useSelector } from "react-redux";
 import { updateChatId } from "../../redux/UserSlice";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { format } from "date-fns";
 
 const Sidebar = () => {
   const user = useSelector((state) => state.user);
   const allUsers = useSelector((state) => state.allUsers);
   const userChats = useSelector((state) => state.chats);
   const [searchQuery, setSearchQuery] = useState("");
+  const chatId = useSelector((state) => state.chatId);
+
+  const [sortedChats, setSortedChats] = useState(userChats);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const formatDate = (date) => {
+    return format(date, "HH:mm");
+  };
 
   const showCurrentChat = (chatId) => {
     dispatch(updateChatId(chatId));
@@ -34,6 +42,21 @@ const Sidebar = () => {
     navigate(`/chat/${friendId}`);
     setSearchQuery("");
   };
+
+  useEffect(() => {
+    setSortedChats(
+      [...userChats].sort((chat1, chat2) => {
+        const dateA = chat1.lastMessage?.timeStamp
+          ? new Date(chat1.lastMessage.timeStamp)
+          : new Date(0);
+        const dateB = chat2.lastMessage?.timeStamp
+          ? new Date(chat2.lastMessage.timeStamp)
+          : new Date(0);
+        return dateB - dateA;
+      })
+    );
+  }, [userChats]);
+
   return (
     <Container
       disableGutters
@@ -83,9 +106,10 @@ const Sidebar = () => {
                 </div>
               </Box>
             ))
-          : userChats.map(({ lastMessage, _id, members, groupChat }) => {
+          : sortedChats.map(({ lastMessage, _id, members, groupChat }) => {
               let avatarUrl = "";
               let displayName = "";
+              let active = chatId == _id;
 
               if (groupChat) {
                 avatarUrl = groupChat.avatar;
@@ -100,7 +124,7 @@ const Sidebar = () => {
                     ? allUsers.find((user) => user._id == members[1]).name
                     : allUsers.find((user) => user._id == members[0]).name;
               }
-              if (!lastMessage) {
+              if (!groupChat && !lastMessage?.content) {
                 return;
               }
               return (
@@ -112,14 +136,15 @@ const Sidebar = () => {
                 >
                   <Box
                     sx={{
-                      ":hover": { backgroundColor: "#fff" },
+                      ":hover": { backgroundColor: active ? "#fff" : "#eee" },
+                      backgroundColor: active ? "#fff" : "",
                       width: "100%",
+                      height: "65px",
                       display: "flex",
                       alignItems: "center",
                       gap: "10px",
                       padding: "10px",
                       cursor: "pointer",
-
                       borderRadius: "10px",
                     }}
                   >
@@ -131,19 +156,37 @@ const Sidebar = () => {
                     <div
                       style={{
                         width: "100%",
+                        height: "100%",
+                        display: "flex",
+                        flexDirection: "column",
                         overflow: "hidden",
                       }}
                     >
-                      <h2>{displayName}</h2>
-
+                      <Stack direction={"row"} alignItems={"center"}>
+                        <Typography
+                          style={{
+                            flex: "1",
+                            fontSize: "24px",
+                            fontWeight: "600",
+                            lineHeight: "25px",
+                          }}
+                        >
+                          {displayName}
+                        </Typography>
+                        <Typography sx={{ fontSize: "12px", fontWeight: 600 }}>
+                          {lastMessage?.timeStamp
+                            ? formatDate(lastMessage?.timeStamp)
+                            : ""}
+                        </Typography>
+                      </Stack>
                       <Typography
                         sx={{
                           textWrap: "nowrap",
                         }}
                       >
-                        {lastMessage.length > 25
-                          ? `${lastMessage.substring(0, 24)}...`
-                          : lastMessage}
+                        {lastMessage?.content?.length > 25
+                          ? `${lastMessage.content.substring(0, 24)}...`
+                          : lastMessage.content}
                       </Typography>
                     </div>
                   </Box>

@@ -39,9 +39,16 @@ io.on("connection", (socket) => {
     socket.join(chatId);
   });
 
+  socket.on("leave-chat", (chatId) => {
+    socket.leave(chatId);
+  });
+
   socket.on("message", async (data) => {
     const { chatId, content, senderId, timeStamp } = data;
-    socket.to(chatId).emit("messageResponse", data);
+
+    socket
+      .to(chatId)
+      .emit("messageResponse", { data, lastMessage: { timeStamp, content } });
 
     await Message.create({
       chatId,
@@ -50,7 +57,10 @@ io.on("connection", (socket) => {
       timeStamp,
     });
 
-    await Chat.findOneAndUpdate({ _id: chatId }, { lastMessage: content });
+    await Chat.findOneAndUpdate(
+      { _id: chatId },
+      { lastMessage: { timeStamp, content } }
+    );
   });
 });
 
