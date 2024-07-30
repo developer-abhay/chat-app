@@ -2,10 +2,10 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   user: null,
-  allUsers: null,
+  allUsers: [],
   chatId: null,
-  requests: null,
-  chats: null,
+  requests: [],
+  chats: [],
 };
 
 export const userSlice = createSlice({

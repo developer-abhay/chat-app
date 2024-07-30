@@ -16,20 +16,18 @@ import ImageIcon from "@mui/icons-material/Image";
 import VideocamIcon from "@mui/icons-material/Videocam";
 import MicIcon from "@mui/icons-material/Mic";
 import DescriptionIcon from "@mui/icons-material/Description";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 import AppLayout from "../components/layout/AppLayout";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { format } from "date-fns";
-import {
-  fetchAllChats,
-  getChatMessages,
-  // sendChatMessages
-} from "../api/api";
+import { getChatMessages } from "../api/api";
 
 import { getSocket } from "../lib/socket";
 import { getChats } from "../redux/UserSlice";
+import { Link } from "react-router-dom";
 
 const Chat = () => {
   const user = useSelector((state) => state.user);
@@ -132,6 +130,17 @@ const Chat = () => {
           borderBottom: "1px solid lightgray",
         }}
       >
+        <Link to={"/"}>
+          <IconButton
+            sx={{
+              transition: "all 0.1s ease",
+              ":hover": { backgroundColor: "#eee" },
+            }}
+          >
+            <ArrowBackIcon />
+          </IconButton>
+        </Link>
+
         <Avatar
           src={
             currentChat.groupChat
@@ -143,7 +152,7 @@ const Chat = () => {
                   ?.avatar
           }
           alt="User-profile"
-          sx={{ width: 52, height: 52, mr: 2 }}
+          sx={{ ml: 1, width: 52, height: 52, mr: 2 }}
         />
         <div style={{ flex: 1 }}>
           <h3 style={{ marginBottom: "-5px", fontWeight: 600 }}>

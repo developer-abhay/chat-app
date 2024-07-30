@@ -30,9 +30,9 @@ import {
   acceptFriendRequest,
   cancelFriendRequest,
   createGroupAPI,
-  sendFriendRequest,
 } from "../../api/api";
 import { useDispatch, useSelector } from "react-redux";
+import { getSocket } from "../../lib/socket";
 
 export default function NavbarDialogComponent({ user, Icon, text }) {
   const allUsers = useSelector((state) => state.allUsers);
@@ -51,7 +51,7 @@ export default function NavbarDialogComponent({ user, Icon, text }) {
   // If notification item
   if (Icon.type.propTypes) {
     Icon = React.cloneElement(Icon, {
-      badgeContent: myNotifications.length, // Set the badgeContent directly on the Badge component
+      badgeContent: myNotifications?.length, // Set the badgeContent directly on the Badge component
     });
   }
   return (
@@ -94,9 +94,14 @@ export default function NavbarDialogComponent({ user, Icon, text }) {
 // Add friend Dialog
 function AddFriendDialog({ user, onClose, open, allUsers, requests }) {
   const dispatch = useDispatch();
+
   const sendRequest = (receiverId) => {
-    sendFriendRequest(user._id, receiverId, dispatch);
+    const socket = getSocket();
+    socket.emit("send-request", { senderId: user._id, receiverId });
+
+    // dispatch(getRequests([...allRequests]));
   };
+
   const cancelRequest = (receiverId) => {
     cancelFriendRequest(user._id, receiverId, dispatch);
   };
@@ -165,6 +170,7 @@ function NotificationDialog({
   setMyNotifications,
 }) {
   const dispatch = useDispatch();
+
   const acceptRequest = (senderId) => {
     acceptFriendRequest(senderId, user._id, dispatch);
   };
@@ -174,7 +180,22 @@ function NotificationDialog({
   };
 
   useEffect(() => {
-    const notifyArray = requests.filter(
+    useEffect(() => {
+      // Listening for incoming friend requests
+      socket.on("receiveFriendRequest", ({ senderId }) => {
+        console.log(`Received a friend request from user: ${senderId}`);
+        // Handle the UI update or notification
+      });
+
+      // Cleanup the listener on component unmount
+      return () => {
+        socket.off("receiveFriendRequest");
+      };
+    }, []);
+  }, []);
+
+  useEffect(() => {
+    const notifyArray = requests?.filter(
       ({ receiverId }) => user._id == receiverId
     );
     setMyNotifications(notifyArray);
@@ -184,17 +205,17 @@ function NotificationDialog({
     <Dialog maxWidth="md" onClose={onClose} open={open}>
       <Box sx={{ p: 3 }}>
         <DialogTitle sx={{ textAlign: "center", py: 0 }}>
-          {myNotifications.length == 0 ? "No Requests" : "Accept Requests"}
+          {myNotifications?.length == 0 ? "No Requests" : "Accept Requests"}
         </DialogTitle>
 
-        {myNotifications.length != 0 && (
+        {myNotifications?.length != 0 && (
           <List
             sx={{
               overflow: "scroll",
               maxHeight: "280px",
             }}
           >
-            {allUsers.map(({ _id, avatar, username }) => {
+            {allUsers?.map(({ _id, avatar, username }) => {
               const notify = Boolean(
                 myNotifications.find(({ senderId }) => senderId == _id)
               );
@@ -287,7 +308,7 @@ function CreateGroupDialog({ onClose, open, allUsers, user }) {
             maxHeight: "280px",
           }}
         >
-          {allUsers.map(({ _id, avatar, username }) => {
+          {allUsers?.map(({ _id, avatar, username }) => {
             if (user._id == _id || !user.friends?.includes(_id)) return;
             const addedToGroup = groupMembers.includes(_id);
             return (

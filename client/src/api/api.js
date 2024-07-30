@@ -14,16 +14,18 @@ const loginUserAPI = async (username, password, dispatch) => {
     }),
   };
 
-  const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_ORIGIN}/user/login`,
-    config
-  );
-
-  if (response.ok) {
-    const data = await response.json();
-    dispatch(login(data.user));
-  } else {
-    console.log("There was some error");
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_ORIGIN}/user/login`,
+      config
+    );
+    if (response.ok) {
+      const data = await response.json();
+      dispatch(login(data.user));
+    }
+    return response.status;
+  } catch (err) {
+    console.log("Internal Server Error");
   }
 };
 
@@ -74,29 +76,30 @@ const fetchAllRequests = async (senderId, dispatch) => {
     config
   );
   const data = await response.json();
+
   dispatch(getRequests(data.allRequests));
   return "Success";
 };
 
-const sendFriendRequest = async (senderId, receiverId, dispatch) => {
-  const config = {
-    method: "post",
-    withCredentials: true,
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      senderId,
-      receiverId,
-    }),
-  };
-  const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_ORIGIN}/request`,
-    config
-  );
-  const data = await response.json();
-  dispatch(getRequests(data.allRequests));
-};
+// const sendFriendRequest = async (senderId, receiverId, dispatch) => {
+//   const config = {
+//     method: "post",
+//     withCredentials: true,
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//     body: JSON.stringify({
+//       senderId,
+//       receiverId,
+//     }),
+//   };
+//   const response = await fetch(
+//     `${import.meta.env.VITE_BACKEND_ORIGIN}/request`,
+//     config
+//   );
+//   const data = await response.json();
+//   dispatch(getRequests(data.allRequests));
+// };
 
 const cancelFriendRequest = async (senderId, receiverId, dispatch) => {
   const config = {
@@ -154,6 +157,7 @@ const fetchAllChats = async (userId, dispatch) => {
     config
   );
   const data = await response.json();
+
   dispatch(getChats(data.allUserChats));
 
   return "Success";
@@ -222,7 +226,7 @@ export {
   loginUserAPI,
   registerUserAPI,
   getAllUSers,
-  sendFriendRequest,
+  // sendFriendRequest,
   fetchAllRequests,
   cancelFriendRequest,
   acceptFriendRequest,

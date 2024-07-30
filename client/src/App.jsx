@@ -28,6 +28,7 @@ const App = () => {
     if (user?._id) {
       setLoading(true);
       initializeSocket(user._id);
+      console.log("connected");
       fetchInitialData();
     }
 

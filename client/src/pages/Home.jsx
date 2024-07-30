@@ -1,8 +1,15 @@
 import AdbIcon from "@mui/icons-material/Adb";
 import { Container, Typography } from "@mui/material";
 import AppLayout from "../components/layout/AppLayout";
+import { useEffect } from "react";
+import { updateChatId } from "../redux/UserSlice";
+import { useDispatch } from "react-redux";
 
 const Home = () => {
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(updateChatId(null));
+  }, []);
   return (
     <Container
       sx={{

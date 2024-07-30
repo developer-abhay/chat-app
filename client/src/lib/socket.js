@@ -4,7 +4,7 @@ let socket;
 
 export const initializeSocket = (userId) => {
   if (!socket) {
-    socket = socketIO.connect("http://localhost:3000", { query: userId });
+    socket = socketIO.connect("http://localhost:3000", { query: { userId } });
   }
   return socket;
 };

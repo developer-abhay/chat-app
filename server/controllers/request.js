@@ -8,17 +8,18 @@ const getAllRequests = async (req, res) => {
   res.status(200).send({ allRequests });
 };
 
-const sendRequest = async (req, res) => {
-  const { senderId, receiverId } = req.body;
-  await Request.create({
-    senderId,
-    receiverId,
-  });
-  const allRequests = await Request.find({
-    $or: [{ receiverId }, { senderId }],
-  });
-  res.status(200).json({ allRequests });
-};
+// const sendRequest = async (req, res) => {
+//   const { senderId, receiverId } = req.body;
+//   await Request.create({
+//     senderId,
+//     receiverId,
+//   });
+//   const allRequests = await Request.find({
+//     $or: [{ receiverId }, { senderId }],
+//   });
+//   res.status(200).json({ allRequests });
+// };
+
 //Cancel and Reject
 const cancelRequest = async (req, res) => {
   const { senderId, receiverId } = req.body;
@@ -75,4 +76,4 @@ const acceptRequest = async (req, res) => {
   });
 };
 
-module.exports = { getAllRequests, sendRequest, cancelRequest, acceptRequest };
+module.exports = { getAllRequests, cancelRequest, acceptRequest };

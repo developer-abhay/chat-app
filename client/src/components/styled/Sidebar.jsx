@@ -28,7 +28,7 @@ const Sidebar = () => {
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
-  const filteredFriends = allUsers.filter(
+  const filteredFriends = allUsers?.filter(
     (u) =>
       user.friends?.includes(u._id) &&
       u.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -44,17 +44,19 @@ const Sidebar = () => {
   };
 
   useEffect(() => {
-    setSortedChats(
-      [...userChats].sort((chat1, chat2) => {
-        const dateA = chat1.lastMessage?.timeStamp
-          ? new Date(chat1.lastMessage.timeStamp)
-          : new Date(0);
-        const dateB = chat2.lastMessage?.timeStamp
-          ? new Date(chat2.lastMessage.timeStamp)
-          : new Date(0);
-        return dateB - dateA;
-      })
-    );
+    if (userChats?.length > 0) {
+      setSortedChats(
+        [...userChats].sort((chat1, chat2) => {
+          const dateA = chat1.lastMessage?.timeStamp
+            ? new Date(chat1.lastMessage.timeStamp)
+            : new Date(0);
+          const dateB = chat2.lastMessage?.timeStamp
+            ? new Date(chat2.lastMessage.timeStamp)
+            : new Date(0);
+          return dateB - dateA;
+        })
+      );
+    }
   }, [userChats]);
 
   return (
@@ -106,7 +108,7 @@ const Sidebar = () => {
                 </div>
               </Box>
             ))
-          : sortedChats.map(({ lastMessage, _id, members, groupChat }) => {
+          : sortedChats?.map(({ lastMessage, _id, members, groupChat }) => {
               let avatarUrl = "";
               let displayName = "";
               let active = chatId == _id;

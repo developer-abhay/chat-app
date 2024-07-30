@@ -37,10 +37,13 @@ const signUp = async (req, res) => {
 
     res.status(200).send({
       user: {
+        _id: user._id,
         name: user.name,
         username: user.username,
         bio: user.bio,
         avatar: user.avatar,
+        friends: data.friends,
+        created_at: data.created_at,
       },
     });
   } catch (err) {

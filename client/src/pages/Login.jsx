@@ -5,21 +5,26 @@ import {
   IconButton,
   Paper,
   TextField,
+  Typography,
 } from "@mui/material";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import React, { useEffect, useState } from "react";
 import { VisuallyHiddenInput } from "../components/styled/StyledComponents";
 import { bgGradient } from "../constants/colors";
 import { validateFormInput } from "../utils/validators";
-import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { login } from "../redux/UserSlice";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import { useDispatch } from "react-redux";
 import { loginUserAPI, registerUserAPI } from "../api/api";
 
 const Login = () => {
   const dispatch = useDispatch();
 
   const [isLogin, setIsLogin] = useState(true);
+  const [loginError, setLoginError] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [passwordVisibility, setPasswordVisibility] = useState(false);
+
   // User Data states
   const [profilePhoto, setProfilePhoto] = useState({});
   const [name, setName] = useState("");
@@ -34,30 +39,46 @@ const Login = () => {
   };
 
   // Login Function
-  const loginUser = (e) => {
+  const loginUser = async (e) => {
     e.preventDefault();
-    loginUserAPI(userName, password, dispatch);
+    const statusCode = await loginUserAPI(userName, password, dispatch);
+    if (statusCode === 404) {
+      setLoginError(true);
+    }
   };
 
   // SignUp Function
   const registerUser = (e) => {
     e.preventDefault();
-    // validateFormInput(profilePhoto, name, userName, password);
+    setErrors({});
+    const validationErrors = validateFormInput(
+      profilePhoto,
+      name,
+      userName,
+      password,
+      bio
+    );
 
-    const signupForm = new FormData();
-    signupForm.append("name", name);
-    signupForm.append("username", userName);
-    signupForm.append("password", password);
-    signupForm.append("bio", bio);
-    signupForm.append("avatar", profilePhoto);
+    if (validationErrors) {
+      console.log(validationErrors);
+      setErrors(validationErrors);
+    } else {
+      const signupForm = new FormData();
+      signupForm.append("name", name);
+      signupForm.append("username", userName);
+      signupForm.append("password", password);
+      signupForm.append("bio", bio);
+      signupForm.append("avatar", profilePhoto);
 
-    registerUserAPI(signupForm, dispatch);
+      registerUserAPI(signupForm, dispatch);
+    }
   };
 
   return (
     <div
       style={{
         background: bgGradient,
+        maxHeight: "fit-content",
       }}
     >
       <Container
@@ -95,11 +116,14 @@ const Login = () => {
                   label="Username"
                   placeholder="@IamUser"
                   value={userName}
-                  onChange={(e) => setUserName(e.target.value)}
-                  sx={{ mt: 2 }}
+                  onChange={(e) => {
+                    setLoginError(false);
+                    setUserName(e.target.value);
+                  }}
+                  sx={{ my: 2 }}
                   fullWidth
                   required
-                  helperText=" "
+                  error={loginError}
                 />
                 <TextField
                   id="password"
@@ -107,11 +131,25 @@ const Login = () => {
                   placeholder="Abc123#"
                   label="Password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  sx={{ mb: 2 }}
+                  onChange={(e) => {
+                    setLoginError(false);
+                    setPassword(e.target.value);
+                  }}
                   fullWidth
                   required
-                  helperText=" "
+                  error={loginError}
                 />
+                {loginError && (
+                  <Typography
+                    variant="caption"
+                    color="error"
+                    width={"100%"}
+                    textAlign={"left"}
+                  >
+                    Invalid Credentials
+                  </Typography>
+                )}
               </>
             ) : (
               <>
@@ -125,6 +163,7 @@ const Login = () => {
                       border: "1px solid lightgray",
                     }}
                   />
+
                   <IconButton
                     sx={{
                       width: "35px",
@@ -132,31 +171,48 @@ const Login = () => {
                       position: "absolute",
                       bottom: "0px",
                       right: "0px",
-                      bgcolor: "rgba(0,0,0,0.2)",
+                      bgcolor: "rgba(0,0,0,0.4)",
                       ":hover": {
-                        bgcolor: "rgba(0,0,0,0.4)",
+                        bgcolor: "rgba(0,0,0,0.8)",
                       },
                     }}
                     component="label"
                   >
-                    <CameraAltIcon />
+                    <CameraAltIcon sx={{ color: "white" }} />
                     <VisuallyHiddenInput
                       type="file"
-                      onChange={(e) => updateAvatar(e)}
+                      onChange={(e) => {
+                        updateAvatar(e);
+                        setErrors({ ...errors, avatar: null });
+                      }}
                     />
                   </IconButton>
                 </div>
+                {errors?.avatar && (
+                  <Typography
+                    sx={{ width: "100%", textAlign: "center" }}
+                    variant="caption"
+                    color="error"
+                    textAlign={"left"}
+                  >
+                    {errors?.avatar}
+                  </Typography>
+                )}
                 <TextField
                   name="name"
                   type="text"
                   placeholder="Your Name"
                   label="Name"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  sx={{ mt: 2 }}
+                  onChange={(e) => {
+                    setErrors({ ...errors, name: null });
+                    setName(e.target.value);
+                  }}
+                  sx={{ mt: 2, mb: 2 }}
                   required
                   fullWidth
-                  helperText=" "
+                  error={Boolean(errors?.name)}
+                  helperText={errors?.name ? errors.name : ""}
                 />
 
                 <TextField
@@ -164,32 +220,59 @@ const Login = () => {
                   type="text"
                   placeholder="@IamUser"
                   label="Username"
+                  sx={{ mb: 2 }}
                   value={userName}
-                  onChange={(e) => setUserName(e.target.value)}
+                  onChange={(e) => {
+                    setErrors({ ...errors, userName: null });
+                    setUserName(e.target.value);
+                  }}
                   fullWidth
                   required
-                  helperText=" "
+                  error={Boolean(errors?.userName)}
+                  helperText={errors?.userName ? errors.userName : ""}
                 />
                 <TextField
                   type="text"
                   placeholder="Coding Enthusiast"
-                  label="Bio"
+                  label="Bio (optional)"
                   value={bio}
-                  onChange={(e) => setBio(e.target.value)}
+                  onChange={(e) => {
+                    setErrors({ ...errors, bio: null });
+                    setBio(e.target.value);
+                  }}
                   fullWidth
-                  helperText=" "
+                  sx={{ mb: 2 }}
+                  error={Boolean(errors?.bio)}
+                  helperText={errors?.bio ? errors.bio : ""}
                 />
-                <TextField
-                  name="password"
-                  type="password"
-                  placeholder="Abc123#"
-                  label="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  fullWidth
-                  required
-                  helperText=" "
-                />
+                <div style={{ width: "100%", position: "relative" }}>
+                  <TextField
+                    name="password"
+                    type={passwordVisibility ? "text" : "password"}
+                    placeholder="Abc123#"
+                    label="Password"
+                    value={password}
+                    onChange={(e) => {
+                      setErrors({ ...errors, password: null });
+                      setPassword(e.target.value);
+                    }}
+                    fullWidth
+                    required
+                    sx={{ mb: 2, position: "relative" }}
+                    error={Boolean(errors?.password)}
+                    helperText={errors?.password ? errors.password : ""}
+                  />
+                  <IconButton
+                    sx={{ position: "absolute", right: "10px", top: "8px" }}
+                    onClick={() => setPasswordVisibility((prev) => !prev)}
+                  >
+                    {passwordVisibility ? (
+                      <VisibilityIcon />
+                    ) : (
+                      <VisibilityOffIcon />
+                    )}
+                  </IconButton>
+                </div>
               </>
             )}
             <Button
