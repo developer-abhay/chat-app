@@ -5,7 +5,8 @@ import "./index.css";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAllChats, fetchAllRequests, getAllUSers } from "./api/api";
 import Loader from "./components/layout/Loaders";
-import { initializeSocket, disconnectSocket } from "./lib/socket";
+import { initializeSocket, disconnectSocket, getSocket } from "./lib/socket";
+import { login } from "./redux/UserSlice";
 
 const Login = lazy(() => import("./pages/Login"));
 const Home = lazy(() => import("./pages/Home"));
@@ -30,6 +31,14 @@ const App = () => {
       initializeSocket(user._id);
       console.log("connected");
       fetchInitialData();
+
+      // Adding friend when request accepted
+      const socket = getSocket();
+      socket.on("acceptFriendRequest", (data) => {
+        const newFriends = [...user.friends, data.receiverId];
+        dispatch(login({ ...user, friends: newFriends }));
+        // fetchInitialData();
+      });
     }
 
     return () => {

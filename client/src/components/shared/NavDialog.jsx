@@ -33,6 +33,7 @@ import {
 } from "../../api/api";
 import { useDispatch, useSelector } from "react-redux";
 import { getSocket } from "../../lib/socket";
+import { getRequests, login } from "../../redux/UserSlice";
 
 export default function NavbarDialogComponent({ user, Icon, text }) {
   const allUsers = useSelector((state) => state.allUsers);
@@ -93,18 +94,52 @@ export default function NavbarDialogComponent({ user, Icon, text }) {
 
 // Add friend Dialog
 function AddFriendDialog({ user, onClose, open, allUsers, requests }) {
+  const socket = getSocket();
   const dispatch = useDispatch();
 
   const sendRequest = (receiverId) => {
-    const socket = getSocket();
     socket.emit("send-request", { senderId: user._id, receiverId });
-
-    // dispatch(getRequests([...allRequests]));
+    dispatch(
+      getRequests([
+        ...requests,
+        {
+          senderId: user._id,
+          receiverId,
+          status: "pending",
+          _id: Math.floor(Math.random() * 10000000000),
+        },
+      ])
+    );
   };
 
   const cancelRequest = (receiverId) => {
-    cancelFriendRequest(user._id, receiverId, dispatch);
+    socket.emit("cancel-request", { senderId: user._id, receiverId });
+    dispatch(
+      getRequests(
+        requests.filter(
+          (req) => !(req.senderId == user._id && req.receiverId == receiverId)
+        )
+      )
+    );
   };
+
+  useEffect(() => {
+    // Updating friend request list on rejection
+    socket.on("rejectFriendRequest", (data) => {
+      dispatch(
+        getRequests(
+          requests.filter(
+            (req) =>
+              !(
+                req.senderId == data.senderId &&
+                req.receiverId == data.receiverId
+              )
+          )
+        )
+      );
+    });
+  }, []);
+
   return (
     <Dialog maxWidth="md" onClose={onClose} open={open}>
       <Box sx={{ p: 2 }}>
@@ -170,28 +205,58 @@ function NotificationDialog({
   setMyNotifications,
 }) {
   const dispatch = useDispatch();
+  const socket = getSocket();
 
+  // Accept Request
   const acceptRequest = (senderId) => {
-    acceptFriendRequest(senderId, user._id, dispatch);
+    socket.emit("accept-request", { senderId, receiverId: user._id });
+
+    const newFriends = [...user.friends, senderId];
+    console.log(user);
+    dispatch(login({ ...user, friends: newFriends }));
+    dispatch(
+      getRequests(
+        requests.filter(
+          (req) => !(req.senderId == senderId && req.receiverId == user._id)
+        )
+      )
+    );
   };
 
+  // Reject Request
   const rejectRequest = (senderId) => {
-    cancelFriendRequest(senderId, user._id, dispatch);
+    socket.emit("reject-request", { senderId, receiverId: user._id });
+    dispatch(
+      getRequests(
+        requests.filter(
+          (req) => !(req.senderId == senderId && req.receiverId == user._id)
+        )
+      )
+    );
   };
 
   useEffect(() => {
-    useEffect(() => {
-      // Listening for incoming friend requests
-      socket.on("receiveFriendRequest", ({ senderId }) => {
-        console.log(`Received a friend request from user: ${senderId}`);
-        // Handle the UI update or notification
-      });
+    // Listening for incoming friend requests
+    socket.on("receiveFriendRequest", (data) => {
+      dispatch(getRequests([...requests, data]));
+    });
 
-      // Cleanup the listener on component unmount
-      return () => {
-        socket.off("receiveFriendRequest");
-      };
-    }, []);
+    // removing notifications for cancelled requests
+    socket.on("cancelFriendRequest", ({ senderId, receiverId }) => {
+      dispatch(
+        getRequests(
+          requests.filter(
+            (req) => !(req.senderId == senderId && req.receiverId == receiverId)
+          )
+        )
+      );
+    });
+
+    // Cleanup the listener on component unmount
+    return () => {
+      socket.off("receiveFriendRequest");
+      socket.off("cancelFriendRequest");
+    };
   }, []);
 
   useEffect(() => {

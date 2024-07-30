@@ -7,7 +7,8 @@ const cookieParser = require("cookie-parser");
 const { createServer } = require("http");
 const { Server } = require("socket.io");
 const { instrument } = require("@socket.io/admin-ui");
-const { Message, Chat } = require("./db");
+const { Message, Chat, Request, User } = require("./db");
+const { randomUUID } = require("crypto");
 
 require("dotenv").config();
 
@@ -38,6 +39,8 @@ io.on("connection", (socket) => {
   const userId = socket.handshake.query.userId;
   userSocketIDs.set(userId.toString(), socket.id);
 
+  console.log(`User ${userId} connected`);
+
   // Switch Chat or Join Chat
   socket.on("join-chat", (chatId) => {
     socket.join(chatId);
@@ -67,28 +70,85 @@ io.on("connection", (socket) => {
       { _id: chatId },
       { lastMessage: { timeStamp, content } }
     );
+
+    socket.broadcast.emit("refetch-chats", { chatId });
   });
 
   //Send Request
   socket.on("send-request", async (data) => {
     const { senderId, receiverId } = data;
-    const recipientSocketId = userSocketIDs.get(recipientId);
-    const receiverSocketId = getUserSocketId(receiverId);
+    const recipientSocketId = userSocketIDs.get(receiverId);
 
-    // socket.to(chatId).emit("requestNotification", {
-    //   data,
-    //   lastMessage: { timeStamp, content },
-    // });
-
-    // res.status(200).json({ allRequests });
+    io.to(recipientSocketId).emit("receiveFriendRequest", {
+      _id: Math.floor(Math.random() * 10000000000),
+      senderId,
+      receiverId,
+      status: "pending",
+    });
 
     await Request.create({
       senderId,
       receiverId,
     });
+  });
 
-    const allRequests = await Request.find({
-      $or: [{ receiverId }, { senderId }],
+  // cancel request
+  socket.on("cancel-request", async (data) => {
+    const { senderId, receiverId } = data;
+    const recipientSocketId = userSocketIDs.get(receiverId);
+
+    io.to(recipientSocketId).emit("cancelFriendRequest", {
+      senderId,
+      receiverId,
+    });
+
+    await Request.findOneAndDelete({
+      senderId,
+      receiverId,
+    });
+  });
+
+  // Accept Request
+  socket.on("accept-request", async (data) => {
+    const { senderId, receiverId } = data;
+    const senderSocketId = userSocketIDs.get(senderId);
+
+    io.to(senderSocketId).emit("acceptFriendRequest", {
+      senderId,
+      receiverId,
+    });
+
+    await User.findOneAndUpdate(
+      { _id: receiverId },
+      { $push: { friends: senderId } }
+    );
+    await User.findOneAndUpdate(
+      { _id: senderId },
+      { $push: { friends: receiverId } }
+    );
+    await Chat.create({
+      members: [receiverId, senderId],
+      groupChat: null,
+    });
+    await Request.findOneAndDelete({
+      senderId,
+      receiverId,
+    });
+  });
+
+  // Reject Request
+  socket.on("reject-request", async (data) => {
+    const { senderId, receiverId } = data;
+    const senderSocketId = userSocketIDs.get(senderId);
+
+    io.to(senderSocketId).emit("rejectFriendRequest", {
+      senderId,
+      receiverId,
+    });
+
+    await Request.findOneAndDelete({
+      senderId,
+      receiverId,
     });
   });
 

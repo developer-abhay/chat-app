@@ -10,7 +10,7 @@ const route = Router();
 const { getAllUsers, login, signUp } = require("../controllers/user");
 const {
   getAllRequests,
-  // sendRequest,
+
   cancelRequest,
   acceptRequest,
 } = require("../controllers/request");
@@ -29,7 +29,6 @@ route.get("/user", getAllUsers);
 
 // All Requests , Send , Cancel / Reject , Accept
 route.get("/request/:id", getAllRequests);
-// route.post("/request", sendRequest);
 route.put("/request", acceptRequest);
 route.delete("/request", cancelRequest);
 

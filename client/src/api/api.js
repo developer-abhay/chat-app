@@ -81,26 +81,6 @@ const fetchAllRequests = async (senderId, dispatch) => {
   return "Success";
 };
 
-// const sendFriendRequest = async (senderId, receiverId, dispatch) => {
-//   const config = {
-//     method: "post",
-//     withCredentials: true,
-//     headers: {
-//       "Content-Type": "application/json",
-//     },
-//     body: JSON.stringify({
-//       senderId,
-//       receiverId,
-//     }),
-//   };
-//   const response = await fetch(
-//     `${import.meta.env.VITE_BACKEND_ORIGIN}/request`,
-//     config
-//   );
-//   const data = await response.json();
-//   dispatch(getRequests(data.allRequests));
-// };
-
 const cancelFriendRequest = async (senderId, receiverId, dispatch) => {
   const config = {
     method: "delete",

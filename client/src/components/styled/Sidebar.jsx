@@ -5,6 +5,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { updateChatId } from "../../redux/UserSlice";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
+import { getSocket } from "../../lib/socket";
+import { fetchAllChats } from "../../api/api";
 
 const Sidebar = () => {
   const user = useSelector((state) => state.user);
@@ -58,6 +60,18 @@ const Sidebar = () => {
       );
     }
   }, [userChats]);
+
+  useEffect(() => {
+    const socket = getSocket();
+
+    socket.on("refetch-chats", async (data) => {
+      console.log("event");
+      if (data.chatId != chatId) {
+        console.log("executed");
+        await fetchAllChats(user._id, dispatch);
+      }
+    });
+  }, []);
 
   return (
     <Container
