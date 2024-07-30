@@ -26,20 +26,21 @@ import RemoveIcon from "@mui/icons-material/Remove";
 import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
 import SearchInput from "./SearchInput";
-import {
-  acceptFriendRequest,
-  cancelFriendRequest,
-  createGroupAPI,
-} from "../../api/api";
+import { createGroupAPI } from "../../api/api";
 import { useDispatch, useSelector } from "react-redux";
 import { getSocket } from "../../lib/socket";
 import { getRequests, login } from "../../redux/UserSlice";
 
-export default function NavbarDialogComponent({ user, Icon, text }) {
+export default function NavbarDialogComponent({
+  user,
+  Icon,
+  text,
+  open,
+  setOpen,
+}) {
   const allUsers = useSelector((state) => state.allUsers);
   const requests = useSelector((state) => state.requests);
   const [myNotifications, setMyNotifications] = useState([]);
-  const [open, setOpen] = useState(false);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -94,6 +95,9 @@ export default function NavbarDialogComponent({ user, Icon, text }) {
 
 // Add friend Dialog
 function AddFriendDialog({ user, onClose, open, allUsers, requests }) {
+  const [filteredUsers, setFilteredUsers] = useState(allUsers);
+  const [filter, setFilter] = useState("");
+
   const socket = getSocket();
   const dispatch = useDispatch();
 
@@ -124,6 +128,13 @@ function AddFriendDialog({ user, onClose, open, allUsers, requests }) {
   };
 
   useEffect(() => {
+    const newUsers = allUsers.filter(({ username }) =>
+      username.includes(filter)
+    );
+    setFilteredUsers(newUsers);
+  }, [filter]);
+
+  useEffect(() => {
     // Updating friend request list on rejection
     socket.on("rejectFriendRequest", (data) => {
       dispatch(
@@ -143,7 +154,11 @@ function AddFriendDialog({ user, onClose, open, allUsers, requests }) {
   return (
     <Dialog maxWidth="md" onClose={onClose} open={open}>
       <Box sx={{ p: 2 }}>
-        <SearchInput placeholder="Search People" />
+        <SearchInput
+          placeholder="Search by username"
+          onChange={(e) => setFilter(e.target.value)}
+          value={filter}
+        />
         <List
           sx={{
             overflow: "scroll",
@@ -151,7 +166,7 @@ function AddFriendDialog({ user, onClose, open, allUsers, requests }) {
           }}
         >
           {allUsers?.length > 0 &&
-            allUsers.map(({ _id, avatar, username }) => {
+            filteredUsers.map(({ _id, avatar, username }) => {
               if (user._id == _id || user.friends?.includes(_id)) return;
 
               const request = Boolean(

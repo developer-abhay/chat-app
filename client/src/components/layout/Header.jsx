@@ -30,6 +30,9 @@ function Header() {
   const mobileMenuId = "primary-search-account-menu-mobile";
 
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [addFriendOpen, setAddFriendOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [createGroupOpen, setCreateGroupOpen] = useState(false);
 
   const handleMenuOpen = () => {
     setIsProfileMenuOpen(true);
@@ -57,15 +60,18 @@ function Header() {
     {
       title: "Add Friend",
       Icon: <AddIcon fontSize="large" />,
+      onClick: () => setAddFriendOpen(true),
     },
     {
       title: "Notifications",
       Icon: <NotificationsIcon fontSize="large" />,
       badge: { content: 10 },
+      onClick: () => setNotificationsOpen(true),
     },
     {
       title: "New Group",
       Icon: <GroupIcon fontSize="large" />,
+      onClick: () => setCreateGroupOpen(true),
     },
   ];
 
@@ -86,20 +92,17 @@ function Header() {
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
     >
-      {mobileMenuList.map(({ title, Icon, onClick, badge }) => (
+      {mobileMenuList.map(({ title, Icon, onClick }) => (
         <MenuItem
           key={title}
-          onClick={onClick}
+          onClick={() => {
+            onClick();
+            handleMobileMenuClose();
+          }}
           sx={{ px: 3, height: "60px", gap: "15px" }}
         >
-          {badge ? (
-            <Badge badgeContent={badge.content} color="error">
-              {Icon}
-              {/* <AddIcon /> */}
-            </Badge>
-          ) : (
-            Icon
-          )}
+          {Icon}
+
           <p>{title}</p>
         </MenuItem>
       ))}
@@ -133,11 +136,15 @@ function Header() {
               user={user}
               text="Add Friends"
               Icon={<AddIcon />}
+              open={addFriendOpen}
+              setOpen={setAddFriendOpen}
             />
             <NavbarDialogComponent
               user={user}
               text="Create Group"
               Icon={<GroupIcon />}
+              open={createGroupOpen}
+              setOpen={setCreateGroupOpen}
             />
             <NavbarDialogComponent
               user={user}
@@ -147,6 +154,8 @@ function Header() {
                   <NotificationsIcon />
                 </Badge>
               }
+              open={notificationsOpen}
+              setOpen={setNotificationsOpen}
             />
             <UserProfile
               user={user}
