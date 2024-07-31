@@ -18,25 +18,38 @@ const AppLayout = () => (WrappedComponent) => {
               display: {
                 xs: "none",
                 sm: "flex",
-                height: "100%",
               },
+              height: "100%",
             }}
           >
             <Sidebar />
           </Grid>
           <Grid
             item
-            xs={12}
-            md={8}
             sm={7}
+            md={8}
             lg={9}
             sx={{
-              display: "flex",
+              display: { xs: "none", sm: "flex" },
               height: "100%",
             }}
           >
             <WrappedComponent {...props} />
-            {/* chatId={chatId} user={user} */}
+          </Grid>
+          <Grid
+            item
+            xs={12}
+            sm={0}
+            sx={{
+              display: { xs: "flex", sm: "none" },
+              height: "100%",
+            }}
+          >
+            {WrappedComponent.name === "Home" ? (
+              <Sidebar />
+            ) : (
+              <WrappedComponent {...props} />
+            )}
           </Grid>
         </Grid>
       </Stack>

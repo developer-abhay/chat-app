@@ -7,6 +7,7 @@ import {
   Menu,
   MenuItem,
   TextField,
+  Typography,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
@@ -28,6 +29,7 @@ import { getChatMessages } from "../api/api";
 import { getSocket } from "../lib/socket";
 import { getChats } from "../redux/UserSlice";
 import { Link } from "react-router-dom";
+import ChatProfile from "../components/shared/ChatProfile";
 
 const Chat = () => {
   const user = useSelector((state) => state.user);
@@ -41,6 +43,8 @@ const Chat = () => {
 
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+
+  const [chatProfileOpen, setChatProfileOpen] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -121,6 +125,14 @@ const Chat = () => {
         flexDirection: "column",
       }}
     >
+      {/* Chat Profile */}
+      <ChatProfile
+        open={chatProfileOpen}
+        onClose={() => setChatProfileOpen(false)}
+        currentChat={currentChat}
+        allUsers={allUsers}
+        userId={user?._id}
+      />
       {/* Chat Header */}
       <Box
         sx={{
@@ -142,6 +154,9 @@ const Chat = () => {
         </Link>
 
         <Avatar
+          onClick={() => {
+            setChatProfileOpen(true);
+          }}
           src={
             currentChat.groupChat
               ? currentChat.groupChat.avatar
@@ -152,10 +167,28 @@ const Chat = () => {
                   ?.avatar
           }
           alt="User-profile"
-          sx={{ ml: 1, width: 52, height: 52, mr: 2 }}
+          sx={{
+            ml: 1,
+            width: 52,
+            height: 52,
+            mr: 2,
+            ":hover": { cursor: "pointer" },
+          }}
         />
         <div style={{ flex: 1 }}>
-          <h3 style={{ marginBottom: "-5px", fontWeight: 600 }}>
+          <Typography
+            variant="h5"
+            onClick={() => {
+              setChatProfileOpen(true);
+            }}
+            sx={{
+              width: "fit-content",
+              fontWeight: 600,
+              "&:hover": {
+                cursor: "pointer",
+              },
+            }}
+          >
             {currentChat.groupChat
               ? currentChat.groupChat.name
               : user._id == currentChat?.members?.[0]
@@ -163,18 +196,19 @@ const Chat = () => {
                   ?.name
               : allUsers.find(({ _id }) => _id == currentChat?.members?.[0])
                   ?.name}
-          </h3>
+          </Typography>
           <p style={{ color: "gray" }}>
             {currentChat.groupChat
               ? `Created by
-            ${
-              allUsers.find(({ _id }) => _id == currentChat.groupChat.creator)
-                .name
-            }
-             `
+              ${
+                allUsers.find(({ _id }) => _id == currentChat.groupChat.creator)
+                  .name
+              }
+                `
               : ""}
           </p>
         </div>
+
         <IconButton>
           <MoreVertIcon />
         </IconButton>

@@ -76,6 +76,7 @@ const Sidebar = () => {
 
   return (
     <Container
+      id="sidebar"
       disableGutters
       sx={{
         display: "flex",
