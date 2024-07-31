@@ -55,14 +55,14 @@ const registerUserAPI = async (signupForm, dispatch) => {
   }
 };
 
-const getAllUSers = async (dispatch) => {
+const getAllUsers = async (dispatch) => {
   const response = await fetch(`${import.meta.env.VITE_BACKEND_ORIGIN}/user`);
   const allUsers = await response.json();
   dispatch(getUsers(allUsers.users));
   return "Success";
 };
 
-// ---------- Request APIs -------------- //
+// ---------- Request API -------------- //
 const fetchAllRequests = async (senderId, dispatch) => {
   const config = {
     method: "get",
@@ -81,49 +81,7 @@ const fetchAllRequests = async (senderId, dispatch) => {
   return "Success";
 };
 
-const cancelFriendRequest = async (senderId, receiverId, dispatch) => {
-  const config = {
-    method: "delete",
-    withCredentials: true,
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      senderId,
-      receiverId,
-    }),
-  };
-  const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_ORIGIN}/request`,
-    config
-  );
-  const data = await response.json();
-  dispatch(getRequests(data.allRequests));
-};
-
-const acceptFriendRequest = async (senderId, receiverId, dispatch) => {
-  const config = {
-    method: "put",
-    withCredentials: true,
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      senderId,
-      receiverId,
-    }),
-  };
-  const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_ORIGIN}/request`,
-    config
-  );
-  const data = await response.json();
-  console.log(data.user);
-  dispatch(getRequests(data.allRequests));
-  dispatch(login(data.user));
-};
-
-//------------ Chat APIs  ------------ //
+//------------ Chat API  ------------ //
 const fetchAllChats = async (userId, dispatch) => {
   const config = {
     method: "get",
@@ -142,27 +100,27 @@ const fetchAllChats = async (userId, dispatch) => {
 
   return "Success";
 };
-const createGroupAPI = async (creator, groupName, members) => {
-  const config = {
-    method: "post",
-    withCredentials: true,
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      creator,
-      groupName,
-      members,
-    }),
-  };
-  const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_ORIGIN}/chat/creategroup`,
-    config
-  );
 
-  const data = await response.json();
-  console.log(data);
-};
+//------------ Create Group API  ------------ //
+// const createGroupAPI = async (creator, groupName, members, dispatch) => {
+//   const config = {
+//     method: "post",
+//     withCredentials: true,
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//     body: JSON.stringify({
+//       creator,
+//       groupName,
+//       members,
+//     }),
+//   };
+//   const response = await fetch(
+//     `${import.meta.env.VITE_BACKEND_ORIGIN}/chat/creategroup`,
+//     config
+//   );
+//   return;
+// };
 
 // ----------- Message APIs ----------- //
 const getChatMessages = async (chatId) => {
@@ -179,6 +137,20 @@ const getChatMessages = async (chatId) => {
   );
   const data = await response.json();
   return data.allMessages;
+};
+
+export {
+  loginUserAPI,
+  registerUserAPI,
+  getAllUsers,
+  // sendFriendRequest,
+  fetchAllRequests,
+  // cancelFriendRequest,
+  // acceptFriendRequest,
+  // createGroupAPI,
+  fetchAllChats,
+  getChatMessages,
+  // sendChatMessages,
 };
 
 // const sendChatMessages = async (chatId, senderId, content) => {
@@ -202,16 +174,44 @@ const getChatMessages = async (chatId) => {
 //   return data.message;
 // };
 
-export {
-  loginUserAPI,
-  registerUserAPI,
-  getAllUSers,
-  // sendFriendRequest,
-  fetchAllRequests,
-  cancelFriendRequest,
-  acceptFriendRequest,
-  createGroupAPI,
-  fetchAllChats,
-  getChatMessages,
-  // sendChatMessages,
-};
+// const cancelFriendRequest = async (senderId, receiverId, dispatch) => {
+//   const config = {
+//     method: "delete",
+//     withCredentials: true,
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//     body: JSON.stringify({
+//       senderId,
+//       receiverId,
+//     }),
+//   };
+//   const response = await fetch(
+//     `${import.meta.env.VITE_BACKEND_ORIGIN}/request`,
+//     config
+//   );
+//   const data = await response.json();
+//   dispatch(getRequests(data.allRequests));
+// };
+
+// const acceptFriendRequest = async (senderId, receiverId, dispatch) => {
+//   const config = {
+//     method: "put",
+//     withCredentials: true,
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//     body: JSON.stringify({
+//       senderId,
+//       receiverId,
+//     }),
+//   };
+//   const response = await fetch(
+//     `${import.meta.env.VITE_BACKEND_ORIGIN}/request`,
+//     config
+//   );
+//   const data = await response.json();
+//   console.log(data.user);
+//   dispatch(getRequests(data.allRequests));
+//   dispatch(login(data.user));
+// };

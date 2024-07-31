@@ -29,8 +29,8 @@ route.get("/user", getAllUsers);
 
 // All Requests , Send , Cancel / Reject , Accept
 route.get("/request/:id", getAllRequests);
-route.put("/request", acceptRequest);
-route.delete("/request", cancelRequest);
+// route.put("/request", acceptRequest);
+// route.delete("/request", cancelRequest);
 
 // Get all chats, Create group
 route.get("/chat/:userId", getAllChats);

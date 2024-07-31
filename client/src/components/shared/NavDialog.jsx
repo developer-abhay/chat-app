@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import {
   Box,
   Button,
+  CircularProgress,
   IconButton,
   Stack,
   TextField,
@@ -26,7 +27,7 @@ import RemoveIcon from "@mui/icons-material/Remove";
 import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
 import SearchInput from "./SearchInput";
-import { createGroupAPI } from "../../api/api";
+
 import { useDispatch, useSelector } from "react-redux";
 import { getSocket } from "../../lib/socket";
 import { getRequests, login } from "../../redux/UserSlice";
@@ -349,22 +350,34 @@ function NotificationDialog({
 function CreateGroupDialog({ onClose, open, allUsers, user }) {
   const [groupName, setGroupName] = useState("");
   const [groupMembers, setGroupMembers] = useState([]);
+  const [errorText, setErrorText] = useState("");
+  const [btnLoading, setBtnLoading] = useState(false);
 
-  const createGroup = () => {
-    if (groupMembers.length < 3) {
-      console.log("Group Should have atleast 3 members");
+  const createGroup = async () => {
+    if (groupMembers.length < 2) {
+      setErrorText("Add atleast 2 members");
+    } else if (groupName.length < 1) {
+      setErrorText("Group should have a valid name");
     } else {
-      createGroupAPI(user._id, groupName, groupMembers);
+      setBtnLoading(true);
+      const socket = getSocket();
+      socket.emit("createGroup", {
+        creator: user._id,
+        groupName,
+        members: groupMembers,
+      });
+      setBtnLoading(false);
+      onClose();
     }
   };
 
   const updateMembers = (addedToGroup, memberId) => {
+    setErrorText("");
     if (addedToGroup) {
       setGroupMembers(groupMembers.filter((id) => id !== memberId));
     } else {
       setGroupMembers([...groupMembers, memberId]);
     }
-    console.log(groupMembers);
   };
 
   return (
@@ -379,7 +392,10 @@ function CreateGroupDialog({ onClose, open, allUsers, user }) {
           size="small"
           placeholder="Enter group name"
           value={groupName}
-          onChange={(e) => setGroupName(e.target.value)}
+          onChange={(e) => {
+            setGroupName(e.target.value);
+            setErrorText("");
+          }}
         />
         <Typography>Add Members</Typography>
         <List
@@ -402,7 +418,7 @@ function CreateGroupDialog({ onClose, open, allUsers, user }) {
                   </Avatar>
                 </ListItemAvatar>
                 <ListItemText primary={username} />
-                <Tooltip title={`${addedToGroup ? "Remove" : "Add Request"}`}>
+                <Tooltip title={`${addedToGroup ? "Remove" : "Add"}`}>
                   <IconButton
                     sx={{
                       backgroundColor: "#eee",
@@ -417,6 +433,14 @@ function CreateGroupDialog({ onClose, open, allUsers, user }) {
             );
           })}
         </List>
+        {errorText && (
+          <Typography
+            sx={{ width: "100%", textAlign: "center", fontSize: "12px" }}
+            color="error"
+          >
+            {errorText}
+          </Typography>
+        )}
         <Stack
           direction="row"
           sx={{ mt: 3, gap: 4, justifyContent: "space-between" }}
@@ -424,8 +448,13 @@ function CreateGroupDialog({ onClose, open, allUsers, user }) {
           <Button variant="outlined" color="error" onClick={onClose}>
             Cancel
           </Button>
+
           <Button variant="contained" onClick={createGroup}>
-            Create
+            {btnLoading ? (
+              <CircularProgress color="inherit" size={20} />
+            ) : (
+              "Create"
+            )}
           </Button>
         </Stack>
       </Box>

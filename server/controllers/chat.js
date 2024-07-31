@@ -10,24 +10,15 @@ const getAllChats = async (req, res) => {
 const creategroup = async (req, res) => {
   const { creator, groupName, members } = req.body;
 
-  if (groupName) {
-    await Chat.create({
-      members: [...members, creator],
-      groupChat: {
-        name: groupName,
-        avatar: "",
-        creator,
-      },
-      lastMessage: "Hello",
-    });
-    console.log(req.body);
-  } else {
-    await Chat.create({
-      members,
-      groupChat: null,
-      lastMessage: "Hello",
-    });
-  }
+  await Chat.create({
+    members: [...members, creator],
+    groupChat: {
+      name: groupName,
+      avatar: "",
+      creator,
+    },
+  });
+
   res.status(200).send({ message: "Success" });
 };
 

@@ -15,7 +15,7 @@ const Sidebar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const chatId = useSelector((state) => state.chatId);
 
-  const [sortedChats, setSortedChats] = useState(userChats);
+  const [sortedChats, setSortedChats] = useState([]);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -47,8 +47,9 @@ const Sidebar = () => {
 
   useEffect(() => {
     if (userChats?.length > 0) {
+      console.log();
       setSortedChats(
-        [...userChats].sort((chat1, chat2) => {
+        [...userChats].reverse().sort((chat1, chat2) => {
           const dateA = chat1.lastMessage?.timeStamp
             ? new Date(chat1.lastMessage.timeStamp)
             : new Date(0);

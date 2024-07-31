@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ProtectRoute from "./components/auth/ProtectRoute";
 import "./index.css";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAllChats, fetchAllRequests, getAllUSers } from "./api/api";
+import { fetchAllChats, fetchAllRequests, getAllUsers } from "./api/api";
 import Loader from "./components/layout/Loaders";
 import { initializeSocket, disconnectSocket, getSocket } from "./lib/socket";
 import { login } from "./redux/UserSlice";
@@ -20,7 +20,7 @@ const App = () => {
 
   useEffect(() => {
     async function fetchInitialData() {
-      await getAllUSers(dispatch);
+      await getAllUsers(dispatch);
       await fetchAllRequests(user._id, dispatch);
       await fetchAllChats(user._id, dispatch);
       setLoading(false);
@@ -37,7 +37,11 @@ const App = () => {
       socket.on("acceptFriendRequest", (data) => {
         const newFriends = [...user.friends, data.receiverId];
         dispatch(login({ ...user, friends: newFriends }));
-        // fetchInitialData();
+      });
+
+      //Updating chats when added to group
+      socket.on("added-to-group", async (data) => {
+        await fetchAllChats(user._id, dispatch);
       });
     }
 

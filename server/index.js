@@ -152,6 +152,32 @@ io.on("connection", (socket) => {
     });
   });
 
+  // Group Created
+  socket.on("createGroup", async (data) => {
+    const { creator, groupName, members } = data;
+
+    await Chat.create({
+      members: [...members, creator],
+      groupChat: {
+        name: groupName,
+        avatar: "",
+        creator,
+      },
+    });
+
+    const creatorSocketId = userSocketIDs.get(creator);
+    if (creatorSocketId) {
+      io.to(creatorSocketId).emit("added-to-group", { groupName });
+    }
+
+    members.forEach((memberId) => {
+      const memberSocketId = userSocketIDs.get(memberId);
+      if (memberSocketId) {
+        io.to(memberSocketId).emit("added-to-group", { groupName });
+      }
+    });
+  });
+
   //Disconnect User
   socket.on("disconnect", () => {
     userSocketIDs.delete(userId.toString());
