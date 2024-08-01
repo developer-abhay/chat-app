@@ -360,14 +360,16 @@ function CreateGroupDialog({ onClose, open, allUsers, user }) {
       setErrorText("Group should have a valid name");
     } else {
       setBtnLoading(true);
-      const socket = getSocket();
-      socket.emit("createGroup", {
-        creator: user._id,
-        groupName,
-        members: groupMembers,
-      });
-      setBtnLoading(false);
-      onClose();
+      setTimeout(() => {
+        const socket = getSocket();
+        socket.emit("createGroup", {
+          creator: user._id,
+          groupName,
+          members: groupMembers,
+        });
+        setBtnLoading(false);
+        onClose();
+      }, 400);
     }
   };
 

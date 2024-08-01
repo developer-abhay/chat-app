@@ -132,6 +132,7 @@ const Chat = () => {
         currentChat={currentChat}
         allUsers={allUsers}
         userId={user?._id}
+        chatId={chatId}
       />
       {/* Chat Header */}
       <Box
@@ -158,7 +159,7 @@ const Chat = () => {
             setChatProfileOpen(true);
           }}
           src={
-            currentChat.groupChat
+            currentChat?.groupChat
               ? currentChat.groupChat.avatar
               : user._id == currentChat?.members?.[0]
               ? allUsers.find(({ _id }) => _id == currentChat?.members?.[1])
@@ -189,7 +190,7 @@ const Chat = () => {
               },
             }}
           >
-            {currentChat.groupChat
+            {currentChat?.groupChat
               ? currentChat.groupChat.name
               : user._id == currentChat?.members?.[0]
               ? allUsers.find(({ _id }) => _id == currentChat?.members?.[1])
@@ -198,7 +199,7 @@ const Chat = () => {
                   ?.name}
           </Typography>
           <p style={{ color: "gray" }}>
-            {currentChat.groupChat
+            {currentChat?.groupChat
               ? `Created by
               ${
                 allUsers.find(({ _id }) => _id == currentChat.groupChat.creator)

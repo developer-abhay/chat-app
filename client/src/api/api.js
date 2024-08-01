@@ -122,6 +122,29 @@ const fetchAllChats = async (userId, dispatch) => {
 //   return;
 // };
 
+const leaveGroupAPI = async (userId, chatId, dispatch) => {
+  const config = {
+    method: "post",
+    withCredentials: true,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      userId,
+      chatId,
+    }),
+  };
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_ORIGIN}/chat/leavegroup`,
+    config
+  );
+  const data = await response.json();
+  console.log(data);
+
+  dispatch(getChats(data.allUserChats));
+  return;
+};
+
 // ----------- Message APIs ----------- //
 const getChatMessages = async (chatId) => {
   const config = {
@@ -148,6 +171,7 @@ export {
   // cancelFriendRequest,
   // acceptFriendRequest,
   // createGroupAPI,
+  leaveGroupAPI,
   fetchAllChats,
   getChatMessages,
   // sendChatMessages,

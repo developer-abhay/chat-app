@@ -14,7 +14,7 @@ const {
   cancelRequest,
   acceptRequest,
 } = require("../controllers/request");
-const { creategroup, getAllChats } = require("../controllers/chat");
+const { creategroup, getAllChats, leavegroup } = require("../controllers/chat");
 const { getAllMessages } = require("../controllers/message");
 
 // Public Routes ->  Login, SignUp
@@ -35,6 +35,7 @@ route.get("/request/:id", getAllRequests);
 // Get all chats, Create group
 route.get("/chat/:userId", getAllChats);
 route.post("/chat/creategroup", creategroup);
+route.post("/chat/leavegroup", leavegroup);
 
 // Get all Chat Messages , Send Message
 route.get("/message/:chatId", getAllMessages);

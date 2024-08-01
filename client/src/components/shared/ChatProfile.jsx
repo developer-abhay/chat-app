@@ -14,27 +14,56 @@ import PropTypes from "prop-types";
 import CreateIcon from "@mui/icons-material/Create";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
-import { current } from "@reduxjs/toolkit";
+import { getSocket } from "../../lib/socket";
+import { leaveGroupAPI } from "../../api/api";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
-const ChatProfile = ({ open, onClose, currentChat, allUsers, userId }) => {
-  const [value, setValue] = useState(0);
-  const [editable, setEditable] = useState(false);
+const ChatProfile = ({
+  open,
+  onClose,
+  currentChat,
+  allUsers,
+  userId,
+  chatId,
+}) => {
+  const [tabValue, setTabValue] = useState(0);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [groupDescription, setGroupDescription] = useState("");
+
   const [isGroup, setIsGroup] = useState(false);
   const [members, setMembers] = useState([]);
   const [friend, setFriend] = useState({});
 
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   // Tabs
   const handleChange = (event, newValue) => {
-    setValue(newValue);
+    setTabValue(newValue);
   };
+
+  const leaveGroup = async () => {
+    await leaveGroupAPI(userId, chatId, dispatch);
+    onClose();
+    navigate("/");
+  };
+
   useEffect(() => {
+    // if group chat , setting all necessary states
     if (currentChat?.groupChat) {
       setIsGroup(true);
       const membersArray = currentChat?.members?.map((member) =>
         allUsers.find((user) => user._id == member)
       );
+      setGroupDescription(currentChat.groupChat.description);
       setMembers(membersArray);
-    } else if (currentChat) {
+      setIsAdmin(currentChat.groupChat.admins.includes(userId));
+    }
+    // if one to one chat , setting all necessary states
+    else if (currentChat) {
       const membersArray = currentChat?.members?.map((member) =>
         allUsers.find((user) => user._id == member && user._id != userId)
       );
@@ -45,6 +74,7 @@ const ChatProfile = ({ open, onClose, currentChat, allUsers, userId }) => {
       setMembers([]);
     }
   }, [currentChat]);
+
   return (
     <Drawer
       anchor="top"
@@ -58,13 +88,14 @@ const ChatProfile = ({ open, onClose, currentChat, allUsers, userId }) => {
           borderRadius: 1,
           height: "fit-content",
           width: { xs: "95%", sm: "fit-content" },
-          minWidth: "260px",
+          minWidth: "300px",
         },
       }}
       keepMounted
     >
-      {isGroup && <BasicTabs handleChange={handleChange} value={value} />}
-      <CustomTabPanel value={value} index={0}>
+      {isGroup && <BasicTabs handleChange={handleChange} value={tabValue} />}
+
+      <CustomTabPanel value={tabValue} index={0}>
         <Box
           sx={{
             p: 2,
@@ -76,14 +107,22 @@ const ChatProfile = ({ open, onClose, currentChat, allUsers, userId }) => {
         >
           <div
             style={{ position: "relative", cursor: "pointer" }}
-            onMouseOver={() => setEditable(true)}
-            onMouseOut={() => setEditable(false)}
+            onMouseOver={() => setHovered(true)}
+            onMouseOut={() => setHovered(false)}
+            onClick={() => {
+              isAdmin
+                ? console.log("hello")
+                : setErrorMsg("Only Admins can edit");
+              setTimeout(() => {
+                setErrorMsg("");
+              }, 1500);
+            }}
           >
             <Avatar
               src={isGroup ? currentChat?.groupChat?.avatar : friend?.avatar}
               sx={{ width: 72, height: 72 }}
             />
-            {editable && (
+            {hovered && (
               <div
                 style={{
                   position: " absolute",
@@ -130,26 +169,37 @@ const ChatProfile = ({ open, onClose, currentChat, allUsers, userId }) => {
               `@${friend?.username}`
             )}
           </Typography>
+          {errorMsg && (
+            <Typography variant="caption" color="error">
+              {errorMsg}
+            </Typography>
+          )}
 
-          <TextField
-            sx={{ width: "100%" }}
-            autoComplete="off"
-            value={friend?.bio}
-            // onChange={(e)=>}
-            variant="standard"
-            placeholder={isGroup ? "Description" : "Bio"}
-          />
+          {isGroup ? (
+            <TextField
+              sx={{ width: "100%" }}
+              autoComplete="off"
+              value={groupDescription}
+              onChange={(e) => {
+                isAdmin
+                  ? setGroupDescription(e.target.value)
+                  : setErrorMsg("Only Admins can edit");
+                setTimeout(() => {
+                  setErrorMsg("");
+                }, 1500);
+              }}
+              variant="standard"
+              placeholder={isGroup ? "Description" : "Bio"}
+            />
+          ) : (
+            <Typography>{friend?.bio}</Typography>
+          )}
 
           <Button
-            sx={{ mt: 2, width: "100%" }}
+            sx={{ width: "100%" }}
             variant="outlined"
             color="error"
-            //   onClick={() => {
-            //     dispatch(logout());
-            //     persistor.purge().then(() => {
-            //       console.log("Persisted state purged successfully");
-            //     });
-            //   }}
+            onClick={leaveGroup}
           >
             {isGroup ? "Leave Group" : "Unfriend"}
           </Button>
@@ -157,7 +207,7 @@ const ChatProfile = ({ open, onClose, currentChat, allUsers, userId }) => {
       </CustomTabPanel>
 
       {isGroup && (
-        <CustomTabPanel value={value} index={1}>
+        <CustomTabPanel value={tabValue} index={1}>
           {isGroup &&
             members?.map(({ _id, name, avatar, username }) => (
               <UserItem
@@ -166,6 +216,8 @@ const ChatProfile = ({ open, onClose, currentChat, allUsers, userId }) => {
                 name={name}
                 avatar={avatar}
                 username={username}
+                isAdmin={isAdmin}
+                currentChat={currentChat}
               />
             ))}
         </CustomTabPanel>
@@ -231,7 +283,7 @@ function BasicTabs({ handleChange, value }) {
 
 //
 
-function UserItem({ _id, name, avatar, username }) {
+function UserItem({ _id, name, avatar, username, isAdmin, currentChat }) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
 
@@ -241,6 +293,10 @@ function UserItem({ _id, name, avatar, username }) {
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const makeAdmin = () => {
+    handleClose();
   };
 
   return (
@@ -256,7 +312,7 @@ function UserItem({ _id, name, avatar, username }) {
           cursor: "pointer",
           borderRadius: "10px",
         }}
-        onClick={handleClick}
+        onClick={(e) => (isAdmin ? handleClick(e) : "")}
       >
         <Avatar
           src={avatar}
@@ -272,6 +328,12 @@ function UserItem({ _id, name, avatar, username }) {
           <h3>{name}</h3>
           <p>@{username}</p>
         </div>
+
+        {currentChat?.groupChat?.admins?.includes(_id) && (
+          <Typography variant="caption" color="success">
+            Admin
+          </Typography>
+        )}
       </Box>
 
       <Menu
@@ -290,7 +352,7 @@ function UserItem({ _id, name, avatar, username }) {
         }}
       >
         <MenuItem onClick={handleClose}>Remove {name.split(" ")[0]}</MenuItem>
-        <MenuItem onClick={handleClose}>Make Admin</MenuItem>
+        <MenuItem onClick={makeAdmin}>Make Admin</MenuItem>
       </Menu>
     </div>
   );

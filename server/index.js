@@ -162,6 +162,7 @@ io.on("connection", (socket) => {
         name: groupName,
         avatar: "",
         creator,
+        admins: [creator],
       },
     });
 

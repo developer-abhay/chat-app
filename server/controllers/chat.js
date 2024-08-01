@@ -16,10 +16,23 @@ const creategroup = async (req, res) => {
       name: groupName,
       avatar: "",
       creator,
+      admins: [creator],
     },
   });
 
   res.status(200).send({ message: "Success" });
 };
 
-module.exports = { getAllChats, creategroup };
+const leavegroup = async (req, res) => {
+  const { userId, chatId } = req.body;
+
+  await Chat.findOneAndUpdate(
+    { _id: chatId },
+    { $pull: { members: { $in: [userId] } } }
+  );
+
+  const allUserChats = await Chat.find({ members: userId });
+  res.status(200).send({ allUserChats });
+};
+
+module.exports = { getAllChats, creategroup, leavegroup };
