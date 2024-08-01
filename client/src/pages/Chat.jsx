@@ -324,7 +324,7 @@ const Chat = () => {
               userId={user._id}
               senderId={senderId}
               allUsers={allUsers}
-              isGroup={Boolean(currentChat.groupChat)}
+              isGroup={Boolean(currentChat?.groupChat)}
             />
           )
         )}

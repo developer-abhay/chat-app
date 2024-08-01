@@ -81,6 +81,27 @@ const fetchAllRequests = async (senderId, dispatch) => {
   return "Success";
 };
 
+const unfriendAPI = async (userId, friendId, dispatch) => {
+  const config = {
+    method: "post",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      userId,
+      friendId,
+    }),
+  };
+
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_ORIGIN}/friend/remove`,
+    config
+  );
+  const data = await response.json();
+  dispatch(login(data.user));
+  return "Success";
+};
+
 //------------ Chat API  ------------ //
 const fetchAllChats = async (userId, dispatch) => {
   const config = {
@@ -190,6 +211,7 @@ export {
   getAllUsers,
   // sendFriendRequest,
   fetchAllRequests,
+  unfriendAPI,
   // cancelFriendRequest,
   // acceptFriendRequest,
   // createGroupAPI,

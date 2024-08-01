@@ -56,7 +56,7 @@ const signUp = async (req, res) => {
 const getAllUsers = async (req, res) => {
   const allUsers = await User.find(
     {},
-    { name: true, username: true, avatar: true }
+    { name: true, username: true, avatar: true, bio: true }
   );
   res.status(200).send({ users: allUsers });
 };

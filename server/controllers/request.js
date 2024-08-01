@@ -8,6 +8,31 @@ const getAllRequests = async (req, res) => {
   res.status(200).send({ allRequests });
 };
 
+//unfriend
+const removeFriend = async (req, res) => {
+  const { userId, friendId } = req.body;
+
+  await User.findOneAndUpdate(
+    { _id: userId },
+    { $pull: { friends: friendId } }
+  );
+  await User.findOneAndUpdate(
+    { _id: friendId },
+    { $pull: { friends: userId } }
+  );
+  await Chat.findOneAndDelete({
+    members: [userId, friendId],
+    groupChat: null,
+  });
+
+  const updatedUser = await User.findOne({ _id: userId });
+
+  res.status(200).json({
+    message: "Friend added successfully",
+    user: updatedUser,
+  });
+};
+
 //Cancel and Reject
 const cancelRequest = async (req, res) => {
   const { senderId, receiverId } = req.body;
@@ -65,4 +90,4 @@ const acceptRequest = async (req, res) => {
   });
 };
 
-module.exports = { getAllRequests, cancelRequest, acceptRequest };
+module.exports = { getAllRequests, removeFriend, cancelRequest, acceptRequest };

@@ -31,6 +31,8 @@ const App = () => {
       setLoading(false);
     }
 
+    let socket;
+
     if (user?._id) {
       setLoading(true);
       initializeSocket(user._id);
@@ -38,7 +40,7 @@ const App = () => {
       fetchInitialData();
 
       // Adding friend when request accepted
-      const socket = getSocket();
+      socket = getSocket();
       socket.on("acceptFriendRequest", (data) => {
         const newFriends = [...user.friends, data.receiverId];
         dispatch(login({ ...user, friends: newFriends }));
@@ -57,6 +59,11 @@ const App = () => {
     }
 
     return () => {
+      if (socket) {
+        socket.off("acceptFriendRequest");
+        socket.off("added-to-group");
+        socket.off("removed-from-group");
+      }
       disconnectSocket();
     };
   }, [user]);

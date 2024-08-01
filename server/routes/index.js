@@ -12,6 +12,7 @@ const {
   getAllRequests,
   cancelRequest,
   acceptRequest,
+  removeFriend,
 } = require("../controllers/request");
 const {
   creategroup,
@@ -33,6 +34,8 @@ route.get("/user", getAllUsers);
 
 // All Requests , Send , Cancel / Reject , Accept
 route.get("/request/:id", getAllRequests);
+route.post("/friend/remove", removeFriend);
+
 // route.put("/request", acceptRequest);
 // route.delete("/request", cancelRequest);
 

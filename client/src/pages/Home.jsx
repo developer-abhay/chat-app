@@ -17,8 +17,9 @@ const Home = ({ user }) => {
   }, []);
 
   useEffect(() => {
-    if (user?._id) {
-      const socket = getSocket();
+    let socket;
+    if (user?._id && socket) {
+      socket = getSocket();
       //Updating chats when removed from group
       socket.on("removed-from-group", async (data) => {
         navigate("/");
@@ -29,6 +30,13 @@ const Home = ({ user }) => {
         await fetchAllChats(user._id, dispatch);
       });
     }
+
+    return () => {
+      if (socket) {
+        socket.off("removed-from-group");
+        socket.off("made-admin");
+      }
+    };
   }, [user]);
 
   return (

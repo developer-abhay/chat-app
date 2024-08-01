@@ -58,36 +58,26 @@ const UserProfile = ({ user, isMenuOpen, handleMenuOpen, handleMenuClose }) => {
         }}
         keepMounted
       >
-        <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 2 }}>
-          <Stack direction="row" sx={{ gap: 1, alignItems: "center" }}>
-            <Avatar src={user.avatar} />
-            <div>
-              <Typography sx={{ fontWeight: "600" }}>
-                {user.username}
-              </Typography>
-              <Typography sx={{ fontSize: "12px", color: "#aaa" }}>
-                Joined:{" "}
-                <span style={{ fontWeight: "600" }}>{user.created_at} </span>
-              </Typography>
-            </div>
-          </Stack>
-
-          <TextField
-            autoComplete="off"
-            value={user.name}
-            // onChange={(e)=>}
-            variant="standard"
-            placeholder="Full Name"
-          />
-          <TextField
-            autoComplete="off"
-            value={user.bio}
-            variant="standard"
-            placeholder="Bio"
-          />
-          <Button size="small">Save Changes</Button>
+        <Box
+          sx={{
+            p: 2,
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            alignItems: "center",
+          }}
+        >
+          <Avatar src={user.avatar} sx={{ width: "70px", height: "70px" }} />
+          <Typography variant="h5"> {user.name}</Typography>
+          <Typography sx={{ fontWeight: "600", my: -1 }}>
+            @{user.username}
+          </Typography>
+          <Typography variant="p"> {user?.bio}</Typography>
+          <Typography sx={{ fontSize: "12px", color: "#aaa" }}>
+            Joined:{" "}
+            <span style={{ fontWeight: "600" }}>{user.created_at} </span>
+          </Typography>
           <Button
-            sx={{ mt: 5 }}
             variant="outlined"
             color="error"
             onClick={() => {

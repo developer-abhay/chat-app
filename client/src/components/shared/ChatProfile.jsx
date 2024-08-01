@@ -20,6 +20,7 @@ import { getSocket } from "../../lib/socket";
 import {
   fetchAllChats,
   leaveGroupAPI,
+  unfriendAPI,
   updateGroupAvatarAPI,
 } from "../../api/api";
 import { useDispatch, useSelector } from "react-redux";
@@ -68,6 +69,12 @@ const ChatProfile = ({
     navigate("/");
   };
 
+  const unfriend = () => {
+    unfriendAPI(userId, friend._id, dispatch);
+    onClose();
+    navigate("/");
+  };
+
   useEffect(() => {
     if (groupAvatar) {
       const updateGroupForm = new FormData();
@@ -86,7 +93,6 @@ const ChatProfile = ({
       const membersArray = currentChat?.members?.map((member) =>
         allUsers.find((user) => user._id == member)
       );
-      console.log(membersArray);
       setMembers(membersArray);
       setIsAdmin(currentChat.groupChat.admins.includes(userId));
     }
@@ -133,63 +139,68 @@ const ChatProfile = ({
             gap: 2,
           }}
         >
-          <div
-            style={{ position: "relative", cursor: "pointer" }}
-            onMouseOver={() => setHovered(true)}
-            onMouseOut={() => setHovered(false)}
-            onClick={() => {
-              isAdmin ? "" : setErrorMsg("Only Admins can edit");
-              setTimeout(() => {
-                setErrorMsg("");
-              }, 1500);
-            }}
-          >
-            <Avatar
-              src={isGroup ? currentChat?.groupChat?.avatar : friend?.avatar}
-              sx={{ width: 72, height: 72 }}
-            />
-            {(hovered || avatarLoading) && (
-              <>
-                <IconButton
-                  sx={{
-                    position: " absolute",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    width: "100%",
-                    height: "100%",
-                    borderRadius: "100%",
-                    top: 0,
-                    left: 0,
-                    color: "white",
-                    bgcolor: "rgba(0,0,0,0.4)",
-                    ":hover": {
-                      bgcolor: "rgba(0,0,0,0.8)",
-                    },
-                  }}
-                  component="label"
-                >
-                  {hovered ? (
-                    <CreateIcon sx={{ margin: "auto", color: "white" }} />
-                  ) : (
-                    <CircularProgress
-                      sx={{ position: " absolute" }}
-                      color="inherit"
-                      size={20}
-                    />
-                  )}
-                  {isAdmin && (
-                    <VisuallyHiddenInput
-                      type="file"
-                      onChange={(e) => {
-                        updateGroupAvatar(e);
-                      }}
-                    />
-                  )}
-                </IconButton>
-              </>
-            )}
-          </div>
+          {isGroup && (
+            <div
+              style={{ position: "relative", cursor: "pointer" }}
+              onMouseOver={() => setHovered(true)}
+              onMouseOut={() => setHovered(false)}
+              onClick={() => {
+                isAdmin ? "" : setErrorMsg("Only Admins can edit");
+                setTimeout(() => {
+                  setErrorMsg("");
+                }, 1500);
+              }}
+            >
+              <Avatar
+                src={currentChat?.groupChat?.avatar}
+                sx={{ width: 72, height: 72 }}
+              />
+              {(hovered || avatarLoading) && (
+                <>
+                  <IconButton
+                    sx={{
+                      position: " absolute",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: "100%",
+                      top: 0,
+                      left: 0,
+                      color: "white",
+                      bgcolor: "rgba(0,0,0,0.4)",
+                      ":hover": {
+                        bgcolor: "rgba(0,0,0,0.8)",
+                      },
+                    }}
+                    component="label"
+                  >
+                    {hovered ? (
+                      <CreateIcon sx={{ margin: "auto", color: "white" }} />
+                    ) : (
+                      <CircularProgress
+                        sx={{ position: " absolute" }}
+                        color="inherit"
+                        size={20}
+                      />
+                    )}
+                    {isAdmin && (
+                      <VisuallyHiddenInput
+                        type="file"
+                        onChange={(e) => {
+                          updateGroupAvatar(e);
+                        }}
+                      />
+                    )}
+                  </IconButton>
+                </>
+              )}
+            </div>
+          )}
+          {!isGroup && (
+            <Avatar src={friend?.avatar} sx={{ width: 72, height: 72 }} />
+          )}
           <Typography variant="h5" sx={{ fontWeight: "600", mt: -1 }}>
             {isGroup ? currentChat?.groupChat?.name : friend?.name}
           </Typography>
@@ -229,7 +240,7 @@ const ChatProfile = ({
             sx={{ width: "100%" }}
             variant="outlined"
             color="error"
-            onClick={leaveGroup}
+            onClick={() => (isGroup ? leaveGroup() : unfriend())}
           >
             {isGroup ? "Leave Group" : "Unfriend"}
           </Button>
