@@ -179,6 +179,36 @@ io.on("connection", (socket) => {
     });
   });
 
+  // Remove member from group
+  socket.on("removeMember", async (data) => {
+    const { memberId, chatId } = data;
+
+    await Chat.findOneAndUpdate(
+      { _id: chatId },
+      { $pull: { members: { $in: [memberId] } } }
+    );
+
+    const memberSocketId = userSocketIDs.get(memberId);
+    if (memberSocketId) {
+      io.to(memberSocketId).emit("removed-from-group", { chatId });
+    }
+  });
+
+  // Make Admin
+  socket.on("makeAdmin", async (data) => {
+    const { memberId, chatId } = data;
+
+    await Chat.findOneAndUpdate(
+      { _id: chatId },
+      { $push: { "groupChat.admins": memberId } }
+    );
+
+    const memberSocketId = userSocketIDs.get(memberId);
+    if (memberSocketId) {
+      io.to(memberSocketId).emit("made-admin", { chatId });
+    }
+  });
+
   //Disconnect User
   socket.on("disconnect", () => {
     userSocketIDs.delete(userId.toString());

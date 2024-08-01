@@ -110,7 +110,7 @@ const Chat = () => {
         socket.off("messageResponse");
       };
     }
-  }, [chatId]);
+  }, [chatId, userChats]);
 
   useEffect(() => {
     const chatBox = document.getElementById("messageBody");

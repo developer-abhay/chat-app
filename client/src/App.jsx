@@ -1,5 +1,10 @@
 import { lazy, Suspense, useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useNavigate,
+} from "react-router-dom";
 import ProtectRoute from "./components/auth/ProtectRoute";
 import "./index.css";
 import { useDispatch, useSelector } from "react-redux";
@@ -41,6 +46,12 @@ const App = () => {
 
       //Updating chats when added to group
       socket.on("added-to-group", async (data) => {
+        await fetchAllChats(user._id, dispatch);
+      });
+
+      //Updating chats when removed from group
+      socket.on("removed-from-group", async (data) => {
+        navigate("/");
         await fetchAllChats(user._id, dispatch);
       });
     }

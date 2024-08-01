@@ -29,7 +29,7 @@ const ChatSchema = new mongoose.Schema({
     name: { type: String },
     avatar: { type: String },
     creator: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    admins: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    admins: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     description: { type: String },
   },
   lastMessage: {

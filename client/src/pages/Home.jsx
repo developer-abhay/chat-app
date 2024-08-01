@@ -4,12 +4,33 @@ import AppLayout from "../components/layout/AppLayout";
 import { useEffect } from "react";
 import { updateChatId } from "../redux/UserSlice";
 import { useDispatch } from "react-redux";
+import { getSocket } from "../lib/socket";
+import { useNavigate } from "react-router-dom";
+import { fetchAllChats } from "../api/api";
 
-const Home = () => {
+const Home = ({ user }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   useEffect(() => {
     dispatch(updateChatId(null));
   }, []);
+
+  useEffect(() => {
+    if (user?._id) {
+      const socket = getSocket();
+      //Updating chats when removed from group
+      socket.on("removed-from-group", async (data) => {
+        navigate("/");
+        await fetchAllChats(user._id, dispatch);
+      });
+
+      socket.on("made-admin", async (data) => {
+        await fetchAllChats(user._id, dispatch);
+      });
+    }
+  }, [user]);
+
   return (
     <Container
       sx={{

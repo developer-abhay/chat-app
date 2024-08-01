@@ -15,9 +15,10 @@ import CreateIcon from "@mui/icons-material/Create";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import { getSocket } from "../../lib/socket";
-import { leaveGroupAPI } from "../../api/api";
-import { useDispatch } from "react-redux";
+import { fetchAllChats, leaveGroupAPI } from "../../api/api";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { getChats } from "../../redux/UserSlice";
 
 const ChatProfile = ({
   open,
@@ -27,11 +28,12 @@ const ChatProfile = ({
   userId,
   chatId,
 }) => {
+  const userChats = useSelector((state) => state.chats);
+
   const [tabValue, setTabValue] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  const [groupDescription, setGroupDescription] = useState("");
 
   const [isGroup, setIsGroup] = useState(false);
   const [members, setMembers] = useState([]);
@@ -58,7 +60,7 @@ const ChatProfile = ({
       const membersArray = currentChat?.members?.map((member) =>
         allUsers.find((user) => user._id == member)
       );
-      setGroupDescription(currentChat.groupChat.description);
+      console.log(membersArray);
       setMembers(membersArray);
       setIsAdmin(currentChat.groupChat.admins.includes(userId));
     }
@@ -73,7 +75,7 @@ const ChatProfile = ({
       setIsGroup(false);
       setMembers([]);
     }
-  }, [currentChat]);
+  }, [currentChat, userChats]);
 
   return (
     <Drawer
@@ -175,25 +177,7 @@ const ChatProfile = ({
             </Typography>
           )}
 
-          {isGroup ? (
-            <TextField
-              sx={{ width: "100%" }}
-              autoComplete="off"
-              value={groupDescription}
-              onChange={(e) => {
-                isAdmin
-                  ? setGroupDescription(e.target.value)
-                  : setErrorMsg("Only Admins can edit");
-                setTimeout(() => {
-                  setErrorMsg("");
-                }, 1500);
-              }}
-              variant="standard"
-              placeholder={isGroup ? "Description" : "Bio"}
-            />
-          ) : (
-            <Typography>{friend?.bio}</Typography>
-          )}
+          {isGroup ? "" : <Typography>{friend?.bio}</Typography>}
 
           <Button
             sx={{ width: "100%" }}
@@ -217,6 +201,7 @@ const ChatProfile = ({
                 avatar={avatar}
                 username={username}
                 isAdmin={isAdmin}
+                userId={userId}
                 currentChat={currentChat}
               />
             ))}
@@ -283,9 +268,19 @@ function BasicTabs({ handleChange, value }) {
 
 //
 
-function UserItem({ _id, name, avatar, username, isAdmin, currentChat }) {
+function UserItem({
+  _id,
+  name,
+  avatar,
+  username,
+  isAdmin,
+  userId,
+  currentChat,
+}) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
+
+  const dispatch = useDispatch();
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -295,7 +290,17 @@ function UserItem({ _id, name, avatar, username, isAdmin, currentChat }) {
     setAnchorEl(null);
   };
 
-  const makeAdmin = () => {
+  const makeAdmin = async () => {
+    const socket = getSocket();
+    socket.emit("makeAdmin", { memberId: _id, chatId: currentChat._id });
+    await fetchAllChats(userId, dispatch);
+    handleClose();
+  };
+
+  const removeFromGroup = async () => {
+    const socket = getSocket();
+    socket.emit("removeMember", { memberId: _id, chatId: currentChat._id });
+    await fetchAllChats(userId, dispatch);
     handleClose();
   };
 
@@ -335,25 +340,31 @@ function UserItem({ _id, name, avatar, username, isAdmin, currentChat }) {
           </Typography>
         )}
       </Box>
+      {userId !== _id && (
+        <Menu
+          id="demo-positioned-menu"
+          aria-labelledby="demo-positioned-button"
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleClose}
+          anchorOrigin={{
+            vertical: "top",
+            horizontal: "right",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "right",
+          }}
+        >
+          <>
+            <MenuItem onClick={removeFromGroup}>
+              Remove {name.split(" ")[0]}
+            </MenuItem>
 
-      <Menu
-        id="demo-positioned-menu"
-        aria-labelledby="demo-positioned-button"
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleClose}
-        anchorOrigin={{
-          vertical: "top",
-          horizontal: "right",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "right",
-        }}
-      >
-        <MenuItem onClick={handleClose}>Remove {name.split(" ")[0]}</MenuItem>
-        <MenuItem onClick={makeAdmin}>Make Admin</MenuItem>
-      </Menu>
+            <MenuItem onClick={makeAdmin}>Make Admin</MenuItem>
+          </>
+        </Menu>
+      )}
     </div>
   );
 }
