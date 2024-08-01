@@ -42,7 +42,10 @@ const MessageSchema = new mongoose.Schema({
   content: { type: String },
   senderId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   chatId: { type: mongoose.Schema.Types.ObjectId, ref: "Chat" },
-  attachments: String,
+  attachment: {
+    url: { type: String },
+    type: { type: String },
+  },
   timeStamp: { type: String, default: new Date().toISOString() },
 });
 

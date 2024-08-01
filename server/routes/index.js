@@ -10,7 +10,6 @@ const route = Router();
 const { getAllUsers, login, signUp } = require("../controllers/user");
 const {
   getAllRequests,
-
   cancelRequest,
   acceptRequest,
 } = require("../controllers/request");
@@ -20,7 +19,7 @@ const {
   leavegroup,
   updateavatar,
 } = require("../controllers/chat");
-const { getAllMessages } = require("../controllers/message");
+const { getAllMessages, sendAttachment } = require("../controllers/message");
 
 // Public Routes ->  Login, SignUp
 route.post("/user/login", loginMiddleware, login);
@@ -46,5 +45,6 @@ route.post("/chat/leavegroup", leavegroup);
 // Get all Chat Messages , Send Message
 route.get("/message/:chatId", getAllMessages);
 // route.post("/message", sendMessage);
+route.post("/message/attachment", upload.single("attachment"), sendAttachment);
 
 module.exports = { route };

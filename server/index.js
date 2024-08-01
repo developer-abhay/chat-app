@@ -74,6 +74,18 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("refetch-chats", { chatId });
   });
 
+  // Send Attachment
+  socket.on("attachment", async (data) => {
+    const { chatId, message, lastMessage } = data;
+
+    socket.to(chatId).emit("messageResponse", {
+      data: message,
+      lastMessage: { timeStamp: message.timeStamp, content: lastMessage },
+    });
+
+    socket.broadcast.emit("refetch-chats", { chatId });
+  });
+
   //Send Request
   socket.on("send-request", async (data) => {
     const { senderId, receiverId } = data;

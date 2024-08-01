@@ -1,4 +1,6 @@
 const { Chat, Message } = require("../db");
+const path = require("path");
+const { uploadToCloudinary } = require("../utils/cloudinary");
 
 const getAllMessages = async (req, res) => {
   const { chatId } = req.params;
@@ -23,4 +25,28 @@ const getAllMessages = async (req, res) => {
 //   res.status(200).send({ message });
 // };
 
-module.exports = { getAllMessages };
+const sendAttachment = async (req, res) => {
+  const { chatId, senderId, timeStamp } = req.body;
+  let attachment;
+
+  if (req.file) {
+    const attachmentPath = path.join(__dirname, "..", req.file.path);
+    attachment = await uploadToCloudinary(attachmentPath);
+  }
+
+  const message = await Message.create({
+    chatId,
+    attachment: { url: attachment, type: req.file.mimetype },
+    senderId,
+    timeStamp,
+  });
+
+  await Chat.findOneAndUpdate(
+    { _id: chatId },
+    { lastMessage: { timeStamp, content: req.file.originalname } }
+  );
+
+  res.status(200).send({ message, lastMessage: req.file.originalname });
+};
+
+module.exports = { getAllMessages, sendAttachment };

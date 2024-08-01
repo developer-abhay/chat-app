@@ -406,8 +406,9 @@ function UserItem({
             <MenuItem onClick={removeFromGroup}>
               Remove {name.split(" ")[0]}
             </MenuItem>
-
-            <MenuItem onClick={makeAdmin}>Make Admin</MenuItem>
+            {!currentChat?.groupChat?.admins?.includes(_id) && (
+              <MenuItem onClick={makeAdmin}>Make Admin</MenuItem>
+            )}
           </>
         </Menu>
       )}
