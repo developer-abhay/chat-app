@@ -122,6 +122,29 @@ const fetchAllChats = async (userId, dispatch) => {
 //   return;
 // };
 
+const updateGroupAvatarAPI = async (
+  updateGroupForm,
+  setAvatarLoading,
+  dispatch
+) => {
+  const config = {
+    method: "post",
+    withCredentials: true,
+    body: updateGroupForm,
+  };
+  for (const [name, value] of updateGroupForm) {
+    console.log(`${name}: ${value}`);
+  }
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_ORIGIN}/chat/updateavatar`,
+    config
+  );
+
+  const data = await response.json();
+  dispatch(getChats(data.allUserChats));
+  setAvatarLoading(false);
+};
+
 const leaveGroupAPI = async (userId, chatId, dispatch) => {
   const config = {
     method: "post",
@@ -139,7 +162,6 @@ const leaveGroupAPI = async (userId, chatId, dispatch) => {
     config
   );
   const data = await response.json();
-  console.log(data);
 
   dispatch(getChats(data.allUserChats));
   return;
@@ -171,6 +193,7 @@ export {
   // cancelFriendRequest,
   // acceptFriendRequest,
   // createGroupAPI,
+  updateGroupAvatarAPI,
   leaveGroupAPI,
   fetchAllChats,
   getChatMessages,

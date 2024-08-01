@@ -3,7 +3,9 @@ import {
   Avatar,
   Box,
   Button,
+  CircularProgress,
   Drawer,
+  IconButton,
   TextField,
   Typography,
 } from "@mui/material";
@@ -15,10 +17,14 @@ import CreateIcon from "@mui/icons-material/Create";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import { getSocket } from "../../lib/socket";
-import { fetchAllChats, leaveGroupAPI } from "../../api/api";
+import {
+  fetchAllChats,
+  leaveGroupAPI,
+  updateGroupAvatarAPI,
+} from "../../api/api";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { getChats } from "../../redux/UserSlice";
+import { VisuallyHiddenInput } from "../styled/StyledComponents";
 
 const ChatProfile = ({
   open,
@@ -37,10 +43,19 @@ const ChatProfile = ({
 
   const [isGroup, setIsGroup] = useState(false);
   const [members, setMembers] = useState([]);
+  const [groupAvatar, setGroupAvatar] = useState();
+  const [avatarLoading, setAvatarLoading] = useState(false);
+
   const [friend, setFriend] = useState({});
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  //Update group Avatar
+  const updateGroupAvatar = (e) => {
+    setAvatarLoading(true);
+    setGroupAvatar(e.target.files[0]);
+  };
 
   // Tabs
   const handleChange = (event, newValue) => {
@@ -52,6 +67,17 @@ const ChatProfile = ({
     onClose();
     navigate("/");
   };
+
+  useEffect(() => {
+    if (groupAvatar) {
+      const updateGroupForm = new FormData();
+      updateGroupForm.append("userId", userId);
+      updateGroupForm.append("chatId", chatId);
+      updateGroupForm.append("groupAvatar", groupAvatar);
+
+      updateGroupAvatarAPI(updateGroupForm, setAvatarLoading, dispatch);
+    }
+  }, [groupAvatar]);
 
   useEffect(() => {
     // if group chat , setting all necessary states
@@ -112,9 +138,7 @@ const ChatProfile = ({
             onMouseOver={() => setHovered(true)}
             onMouseOut={() => setHovered(false)}
             onClick={() => {
-              isAdmin
-                ? console.log("hello")
-                : setErrorMsg("Only Admins can edit");
+              isAdmin ? "" : setErrorMsg("Only Admins can edit");
               setTimeout(() => {
                 setErrorMsg("");
               }, 1500);
@@ -124,24 +148,46 @@ const ChatProfile = ({
               src={isGroup ? currentChat?.groupChat?.avatar : friend?.avatar}
               sx={{ width: 72, height: 72 }}
             />
-            {hovered && (
-              <div
-                style={{
-                  position: " absolute",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  width: "100%",
-                  height: "100%",
-                  borderRadius: "100%",
-                  backgroundColor: "black",
-                  opacity: "0.7",
-                  top: 0,
-                  left: 0,
-                }}
-              >
-                <CreateIcon sx={{ margin: "auto", color: "white" }} />
-              </div>
+            {(hovered || avatarLoading) && (
+              <>
+                <IconButton
+                  sx={{
+                    position: " absolute",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    width: "100%",
+                    height: "100%",
+                    borderRadius: "100%",
+                    top: 0,
+                    left: 0,
+                    color: "white",
+                    bgcolor: "rgba(0,0,0,0.4)",
+                    ":hover": {
+                      bgcolor: "rgba(0,0,0,0.8)",
+                    },
+                  }}
+                  component="label"
+                >
+                  {hovered ? (
+                    <CreateIcon sx={{ margin: "auto", color: "white" }} />
+                  ) : (
+                    <CircularProgress
+                      sx={{ position: " absolute" }}
+                      color="inherit"
+                      size={20}
+                    />
+                  )}
+                  {isAdmin && (
+                    <VisuallyHiddenInput
+                      type="file"
+                      onChange={(e) => {
+                        updateGroupAvatar(e);
+                      }}
+                    />
+                  )}
+                </IconButton>
+              </>
             )}
           </div>
           <Typography variant="h5" sx={{ fontWeight: "600", mt: -1 }}>
